@@ -28,12 +28,8 @@ internal sealed class BuildCommand : ICommand<Unit>
 
     public async ValueTask<Unit> Handle(BuildCommand command, CancellationToken ct)
     {
-      string? repoRoot = Git.FindRoot();
-
-      if (repoRoot is null)
-      {
+      string? repoRoot = Git.FindRoot() ??
         throw new InvalidOperationException("Could not find git repository root (.git not found)");
-      }
 
       if (!File.Exists(Path.Combine(repoRoot, "timewarp-builder.slnx")))
       {

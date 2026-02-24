@@ -15,7 +15,7 @@ using System.Xml.Linq;
 /// <summary>
 /// Run the full CI/CD pipeline.
 /// </summary>
-[NuruRoute("ci", Description = "Run full CI/CD pipeline")]
+[NuruRoute("workflow", Description = "Run full CI/CD pipeline")]
 internal sealed class CiCommand : ICommand<Unit>
 {
   [Option("mode", "m", Description = "CI mode: pr, merge, or release (auto-detected from GITHUB_EVENT_NAME if not specified)")]
