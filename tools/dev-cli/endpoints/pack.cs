@@ -28,12 +28,8 @@ internal sealed class PackCommand : ICommand<Unit>
 
     public async ValueTask<Unit> Handle(PackCommand command, CancellationToken ct)
     {
-      string? repoRoot = Git.FindRoot();
-
-      if (repoRoot is null)
-      {
+      string? repoRoot = Git.FindRoot() ??
         throw new InvalidOperationException("Could not find git repository root (.git not found)");
-      }
 
       if (!File.Exists(Path.Combine(repoRoot, "timewarp-builder.slnx")))
       {
@@ -61,7 +57,7 @@ internal sealed class PackCommand : ICommand<Unit>
       {
         Environment.ExitCode = exitCode;
         Terminal.WriteErrorLine("Pack failed!");
-        return Unit.Value;
+        return Value;
       }
 
       // List produced packages
@@ -73,7 +69,7 @@ internal sealed class PackCommand : ICommand<Unit>
         Terminal.WriteLine($"  {Path.GetFileName(package)}");
       }
 
-      return Unit.Value;
+      return Value;
     }
   }
 }

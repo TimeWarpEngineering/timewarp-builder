@@ -1,8 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- Independent versioning - not tied to Nuru version -->
-    <Version>1.0.0-beta.1</Version>
     <AssemblyName>TimeWarp.Builder</AssemblyName>
     <RootNamespace>TimeWarp.Builder</RootNamespace>
     <Description>Fluent builder interfaces and scope extensions for TimeWarp projects</Description>
@@ -15,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="../../README.md" Pack="true" PackagePath="" />
+    <None Include="$(RepositoryRoot)readme.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>

@@ -31,13 +31,7 @@ internal sealed class TestCommand : ICommand<Unit>
 
     public async ValueTask<Unit> Handle(TestCommand command, CancellationToken ct)
     {
-      string? repoRoot = Git.FindRoot();
-
-      if (repoRoot is null)
-      {
-        throw new InvalidOperationException("Could not find git repository root (.git not found)");
-      }
-
+      string? repoRoot = Git.FindRoot() ?? throw new InvalidOperationException("Could not find git repository root (.git not found)");
       if (!File.Exists(Path.Combine(repoRoot, "timewarp-builder.slnx")))
       {
         throw new InvalidOperationException("Could not find repository root (timewarp-builder.slnx not found)");
@@ -49,7 +43,7 @@ internal sealed class TestCommand : ICommand<Unit>
       {
         Terminal.WriteErrorLine("No tests directory found. Create tests/ and add a test project first.");
         Environment.ExitCode = 1;
-        return Unit.Value;
+        return Value;
       }
 
       Terminal.WriteLine("Running TimeWarp.Builder tests...");
@@ -74,11 +68,11 @@ internal sealed class TestCommand : ICommand<Unit>
       {
         Environment.ExitCode = exitCode;
         Terminal.WriteErrorLine($"Tests failed with exit code {exitCode}");
-        return Unit.Value;
+        return Value;
       }
 
       Terminal.WriteLine("\n✅ Tests completed successfully!");
-      return Unit.Value;
+      return Value;
     }
   }
 }

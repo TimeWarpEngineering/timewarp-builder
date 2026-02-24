@@ -25,12 +25,8 @@ internal sealed class SelfInstallCommand : ICommand<Unit>
 
     public async ValueTask<Unit> Handle(SelfInstallCommand command, CancellationToken ct)
     {
-      string? repoRoot = Git.FindRoot();
-
-      if (repoRoot is null)
-      {
+      string? repoRoot = Git.FindRoot() ??
         throw new InvalidOperationException("Could not find git repository root (.git not found)");
-      }
 
       if (!File.Exists(Path.Combine(repoRoot, "timewarp-builder.slnx")))
       {
@@ -60,7 +56,7 @@ internal sealed class SelfInstallCommand : ICommand<Unit>
       {
         Environment.ExitCode = exitCode;
         Terminal.WriteErrorLine("AOT compilation failed!");
-        return Unit.Value;
+        return Value;
       }
 
       string binaryName = rid.StartsWith("win", StringComparison.OrdinalIgnoreCase) ? "dev.exe" : "dev";
@@ -78,7 +74,7 @@ internal sealed class SelfInstallCommand : ICommand<Unit>
         throw new InvalidOperationException($"Binary not found at expected location: {binaryPath}");
       }
 
-      return Unit.Value;
+      return Value;
     }
 
     private static string GetRuntimeIdentifier()
