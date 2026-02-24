@@ -13,7 +13,7 @@ Reference implementation: See other TimeWarp repos (timewarp-nuru, timewarp-amur
 - [x] **Create dev CLI project structure**
   - Create `tools/dev-cli/` directory
   - Create `tools/dev-cli/dev.cs` (entry point runfile)
-  - Create `tools/dev-cli/commands/` directory for command implementations
+  - Create `tools/dev-cli/endpoints/` directory for command implementations
   - Add dev CLI project to solution (`timewarp-builder.slnx`)
 
 - [x] **Add required package references**
@@ -27,7 +27,7 @@ Reference implementation: See other TimeWarp repos (timewarp-nuru, timewarp-amur
 - [x] **Implement `build` command**
   - Build the main library: `dotnet build source/timewarp-builder/`
   - Support `--configuration` option (Debug/Release)
-  - Support `--verbosity` option
+  - Support `--verbose` option
   - Return appropriate exit codes
 
 - [x] **Implement `test` command**
@@ -67,6 +67,11 @@ Reference implementation: See other TimeWarp repos (timewarp-nuru, timewarp-amur
   - Run analyzers and report warnings as errors
   - Essentially `dotnet build` with strict settings
 
+- [x] **Implement `workflow` command**
+  - Run full CI/CD pipeline: clean -> build -> test (PR mode)
+  - Release mode: clean -> build -> check-version -> pack -> push
+  - Auto-detect mode from `GITHUB_EVENT_NAME`
+
 ### Integration & Documentation
 
 - [x] **Wire up in solution**
@@ -84,19 +89,21 @@ Reference implementation: See other TimeWarp repos (timewarp-nuru, timewarp-amur
 
 ## Results
 
-**Commit:** e432432  
+**Commit:** e432432 (initial), subsequent commits for renaming  
 **Date:** 2026-02-23
 
 ### What was implemented
 - `tools/dev-cli/dev.cs` — Entry point runfile using TimeWarp.Nuru Endpoint DSL
 - `tools/dev-cli/Directory.Build.props` — Build config with AOT support, global usings, package references
-- `tools/dev-cli/commands/build-command.cs` — Build library with `--configuration` and `--verbose` options
-- `tools/dev-cli/commands/clean-command.cs` — Clean solution + delete all bin/obj directories
-- `tools/dev-cli/commands/pack-command.cs` — Create NuGet packages to `artifacts/packages/`
-- `tools/dev-cli/commands/test-command.cs` — Run test suite (gracefully handles missing tests directory)
-- `tools/dev-cli/commands/format-command.cs` — Check/fix code formatting via `dotnet format`
-- `tools/dev-cli/commands/self-install-command.cs` — AOT compile dev CLI to `./bin/dev`
+- `tools/dev-cli/endpoints/build.cs` — Build library with `--configuration` and `--verbose` options
+- `tools/dev-cli/endpoints/clean.cs` — Clean project + delete all bin/obj directories (targets .csproj not .slnx)
+- `tools/dev-cli/endpoints/pack.cs` — Create NuGet packages to `artifacts/packages/`
+- `tools/dev-cli/endpoints/test.cs` — Run test suite (gracefully handles missing tests directory)
+- `tools/dev-cli/endpoints/format.cs` — Check/fix code formatting via `dotnet format`
+- `tools/dev-cli/endpoints/self-install.cs` — AOT compile dev CLI to `./bin/dev`
+- `tools/dev-cli/endpoints/workflow.cs` — Full CI/CD pipeline orchestration (ci command)
 - `.envrc` — `PATH_add bin` for direnv integration
+- `.github/workflows/workflow.yml` — GitHub Actions workflow calling `dev ci`
 
 ### Files modified
 - `Directory.Packages.props` — Added TimeWarp.Nuru 3.0.0-beta.54; updated TimeWarp.Amuru to 1.0.0-beta.20
@@ -104,21 +111,30 @@ Reference implementation: See other TimeWarp repos (timewarp-nuru, timewarp-amur
 
 ### Key decisions
 - Used `Shell.Builder` fallback for `dotnet test` — `DotNet.Test()` does not exist in Amuru API
+- Directory renamed from `commands/` to `endpoints/` to follow Nuru convention
+- Files renamed from `*-command.cs` to `*.cs` (e.g., `build-command.cs` → `build.cs`)
 - Renamed `Configuration` → `Config` in build/pack commands to avoid source-generator naming conflicts
-- `test` command gracefully handles the case where `tests/` directory doesn't exist yet (returns exit code 1 with helpful message)
+- `clean.cs` targets `.csproj` directly instead of `.slnx` (the slnx parser fails on runfile entries)
+- `test` command gracefully handles the case where `tests/` directory doesn't exist yet
 - `.envrc` placed at repo root; `direnv allow` needed once after cloning
 
 ### Test results
-CLI compiles and `--help` shows all 6 commands (build, clean, format, pack, self-install, test):
+CLI compiles and `--help` shows all 7 commands:
 ```
 Commands:
   build         Build the TimeWarp.Builder library
+  ci            Run full CI/CD pipeline
   clean         Clean solution and build artifacts
   format        Check or fix code formatting
   pack          Create NuGet packages
   self-install  AOT compile and install dev CLI to ./bin
   test          Run the test suite
 ```
+
+`dev ci` runs successfully:
+- Step 1/3 Clean ✅
+- Step 2/3 Build ✅ (0 warnings, 0 errors, package produced)
+- Step 3/3 Test ✅ (gracefully reports no test project yet)
 
 ## Notes
 
@@ -138,25 +154,24 @@ TimeWarp.Nuru provides:
 - Built-in help generation
 - Consistent patterns across TimeWarp repos
 
-### Reference Implementation Pattern
-
-Typical dev CLI structure in TimeWarp repos:
+### Actual Structure in This Repo
 
 ```
 tools/
   dev-cli/
     dev.cs              # Entry point (runfile)
-    commands/
-      build.cs          # Build command handler
-      test.cs           # Test command handler
-      clean.cs          # Clean command handler
-      pack.cs           # Pack command handler
-      self-install.cs   # Self-install command handler
+    Directory.Build.props
+    endpoints/          # Named endpoints/ not commands/
+      build.cs
+      clean.cs
+      format.cs
+      pack.cs
+      self-install.cs
+      test.cs
+      workflow.cs
 ```
 
-### Commands to Expose
-
-Based on this repository's needs:
+### Commands Available
 
 | Command | Description | Example Usage |
 |---------|-------------|---------------|
@@ -164,9 +179,9 @@ Based on this repository's needs:
 | `test` | Run tests | `./bin/dev test --filter "AlsoTests"` |
 | `clean` | Clean artifacts | `./bin/dev clean` |
 | `pack` | Create NuGet package | `./bin/dev pack` |
-| `restore` | Restore packages | `./bin/dev restore` |
 | `format` | Format code | `./bin/dev format` |
 | `self-install` | Install dev CLI | `dotnet run tools/dev-cli/dev.cs -- self-install` |
+| `ci` / `workflow` | Run CI/CD pipeline | `dotnet run tools/dev-cli/dev.cs -- ci` |
 
 ### AOT Considerations
 
@@ -176,16 +191,7 @@ The dev CLI should be AOT-compatible:
 - Use `TimeWarp.Amuru` for process execution instead of `System.Diagnostics.Process`
 - Test with `dotnet publish -p:PublishAot=true`
 
-### Integration with Existing Build
-
-The dev CLI should work with existing infrastructure:
-- Respect `Directory.Build.props` settings
-- Use `msbuild/repository.props` paths where appropriate
-- Output to existing `artifacts/` directory structure
-
 ### First-Time Setup
-
-Document how developers first use the dev CLI:
 
 ```bash
 # Initial setup (run once)
@@ -194,27 +200,11 @@ dotnet run tools/dev-cli/dev.cs -- self-install
 # Subsequent usage (fast AOT version)
 ./bin/dev build
 ./bin/dev test
-./bin/dev pack
+./bin/dev ci
 ```
 
 ### Related Tasks
 
 - Task 001: Address code review blockers for v1.0.0 release
-  - When implementing dev CLI `test` command, coordinate with test project creation
-  - The dev CLI will need to know how to run the test project once it exists
-
-### Files to Create/Modify
-
-**New files:**
-- `tools/dev-cli/dev.cs`
-- `tools/dev-cli/commands/build.cs`
-- `tools/dev-cli/commands/test.cs`
-- `tools/dev-cli/commands/clean.cs`
-- `tools/dev-cli/commands/pack.cs`
-- `tools/dev-cli/commands/self-install.cs`
-- `tools/dev-cli/global-usings.cs` (if needed)
-
-**Modified files:**
-- `timewarp-builder.slnx` - add dev CLI project reference
-- `.gitignore` - ensure dev CLI build artifacts are ignored
-- `AGENTS.md` - document dev CLI usage (or create if doesn't exist)
+  - Includes adding tests, which will run via `dev test` in CI
+  - The `dev ci` command already handles the case gracefully when no tests exist
