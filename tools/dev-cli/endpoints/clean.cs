@@ -1,12 +1,12 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // CLEAN COMMAND
 // ═══════════════════════════════════════════════════════════════════════════════
-// Cleans the TimeWarp.Builder solution and deletes all bin/obj directories.
+// Cleans the TimeWarp.Builder project and deletes all bin/obj directories.
 
 namespace DevCli.Commands;
 
 /// <summary>
-/// Clean the solution and all build artifacts.
+/// Clean the project and all build artifacts.
 /// </summary>
 [NuruRoute("clean", Description = "Clean solution and build artifacts")]
 internal sealed class CleanCommand : ICommand<Unit>
@@ -22,23 +22,21 @@ internal sealed class CleanCommand : ICommand<Unit>
 
     public async ValueTask<Unit> Handle(CleanCommand command, CancellationToken ct)
     {
-      string? repoRoot = Git.FindRoot();
-
-      if (repoRoot is null)
-      {
+      string? repoRoot = Git.FindRoot() ??
         throw new InvalidOperationException("Could not find git repository root (.git not found)");
-      }
 
       if (!File.Exists(Path.Combine(repoRoot, "timewarp-builder.slnx")))
       {
         throw new InvalidOperationException("Could not find repository root (timewarp-builder.slnx not found)");
       }
 
-      Terminal.WriteLine("Cleaning TimeWarp.Builder solution...");
+      string projectPath = Path.Combine(repoRoot, "source", "timewarp-builder", "timewarp-builder.csproj");
+
+      Terminal.WriteLine("Cleaning TimeWarp.Builder...");
       Terminal.WriteLine($"Working from: {repoRoot}");
 
       int exitCode = await DotNet.Clean()
-        .WithProject(Path.Combine(repoRoot, "timewarp-builder.slnx"))
+        .WithProject(projectPath)
         .WithVerbosity("minimal")
         .RunAsync();
 
@@ -46,7 +44,7 @@ internal sealed class CleanCommand : ICommand<Unit>
       {
         Environment.ExitCode = exitCode;
         Terminal.WriteErrorLine("dotnet clean failed!");
-        return Unit.Value;
+        return Value;
       }
 
       // Also delete obj and bin directories for a thorough clean
@@ -72,7 +70,7 @@ internal sealed class CleanCommand : ICommand<Unit>
       }
 
       Terminal.WriteLine("\n✅ Clean completed successfully!");
-      return Unit.Value;
+      return Value;
     }
   }
 }
