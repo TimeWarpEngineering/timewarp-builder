@@ -1,0 +1,1 @@
+T:System.Console;Use TimeWarp.Terminal.Terminal static class or inject ITerminal instead
