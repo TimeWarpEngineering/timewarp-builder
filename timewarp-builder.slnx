@@ -2,4 +2,7 @@
   <Folder Name="/source/">
     <Project Path="source/timewarp-builder/timewarp-builder.csproj" />
   </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/dev-cli/dev.cs" />
+  </Folder>
 </Solution>
