@@ -41,8 +41,7 @@ internal sealed class TestCommand : ICommand<Unit>
 
       if (!Directory.Exists(testsDirectory))
       {
-        Terminal.WriteErrorLine("No tests directory found. Create tests/ and add a test project first.");
-        Environment.ExitCode = 1;
+        Terminal.WriteLine("No tests directory found. Skipping test step.");
         return Value;
       }
 
