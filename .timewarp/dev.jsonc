@@ -1,0 +1,6 @@
+{
+  "checkVersionConfig": {
+    "checkVersionStrategy": "nuget-search",
+    "packages": "TimeWarp.Builder"
+  }
+}

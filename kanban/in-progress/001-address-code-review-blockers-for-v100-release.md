@@ -26,14 +26,14 @@ Code review report: `.agent/workspace/2026-02-23T00-00-00_code-review-release-re
   - Test null guard behavior - all methods throw `ArgumentNullException` when callback is null
   - Test interface implementations work correctly (integration-style with concrete builders)
 
-- [ ] **Add required NuGet metadata to `timewarp-builder.csproj`**
-  - `<Authors>TimeWarp Engineering</Authors>` (or appropriate value)
-  - `<PackageProjectUrl>https://github.com/TimeWarpEngineering/timewarp-builder</PackageProjectUrl>`
-  - `<RepositoryUrl>https://github.com/TimeWarpEngineering/timewarp-builder.git</RepositoryUrl>`
-  - `<PackageLicenseExpression>MIT</PackageLicenseExpression>` (verify LICENSE file matches)
+- [x] **Add required NuGet metadata** (commit: 2e47e84)
+  - Metadata is in `source/Directory.Build.props` (shared by all source projects)
+  - `<Authors>Steven T. Cramer</Authors>`
+  - `<RepositoryUrl>https://github.com/TimeWarpEngineering/timewarp-builder</RepositoryUrl>`
+  - `<PackageLicenseExpression>Unlicense</PackageLicenseExpression>` (matches LICENSE file)
 
-- [ ] **Bump version for release**
-  - Change `<Version>1.0.0-beta.1</Version>` to `<Version>1.0.0</Version>` in `timewarp-builder.csproj`
+- [x] **Bump version for release** (commit: 49848cd)
+  - Changed `<Version>1.0.0-beta.1</Version>` to `<Version>1.0.0-beta.2</Version>` in `source/Directory.Build.props`
 
 ### ⚠️ High Priority (strongly recommended)
 
@@ -85,7 +85,7 @@ Code review report: `.agent/workspace/2026-02-23T00-00-00_code-review-release-re
 **Reviewer:** claude-sonnet-4-6 (automated analysis)  
 **Date:** 2026-02-23  
 **Branch:** Cramer-2025-12-22-dev  
-**Version:** 1.0.0-beta.1
+**Version:** 1.0.0-beta.2
 
 **Overall Assessment:** The C# source code is excellent - clean, well-documented, AOT-compatible, with aggressive analyzer enforcement. All 4 files are correct and fully documented. The blockers are all in tooling, packaging, and testing infrastructure - not in the core logic.
 
@@ -99,12 +99,12 @@ Code review report: `.agent/workspace/2026-02-23T00-00-00_code-review-release-re
 - Clean file naming conventions
 
 **Key Issues Found:**
-1. `msbuild/repository.props` has stale references to `timewarp-nuru` (copied from another repo)
+1. ~~`msbuild/repository.props` has stale references to `timewarp-nuru`~~ - FIXED
 2. Zero automated tests - no test project exists
-3. Missing required NuGet metadata (Authors, URLs, License)
+3. ~~Missing required NuGet metadata (Authors, URLs, License)~~ - FIXED (in source/Directory.Build.props)
 4. README lacks installation instructions and badges
-5. Package icon exists but isn't referenced in `.csproj`
-6. `Directory.Packages.props` contains many irrelevant packages from nuru monorepo
+5. Package icon exists but isn't referenced in `.csproj` (currently uses logo.png)
+6. `Directory.Packages.props` contains unused packages from monorepo
 
 With the blockers resolved, this library is ready for a clean v1.0.0 release.
 
