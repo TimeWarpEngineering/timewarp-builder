@@ -16,8 +16,10 @@ Code review report: `.agent/workspace/2026-02-23T00-00-00_code-review-release-re
   - Add `ToolsDirectory` for future tooling support
   - Note: TestsDirectory, SamplesDirectory, BenchmarksDirectory left in place for future use
 
-- [ ] **Add automated tests**
-  - Create test project (suggested: `tests/TimeWarp.Builder.Tests/`)
+- [x] **Add automated tests** (2026-07-02)
+  - Implemented as TimeWarp.Jaribu runfiles under `tests/` (repo convention) rather than a dotnet-test project; `dev test` runs each runfile and aggregates exit codes
+  - 21 tests across 6 files: 4 scope-extension files + 2 interface integration files (concrete builders modeled on TimeWarp.Nuru's usage), covering null guards and covariance
+  - Original scope:
   - Test all 4 scope extension methods:
     - `Also` - executes action, returns original object
     - `Apply` - executes action, returns original object
@@ -37,7 +39,7 @@ Code review report: `.agent/workspace/2026-02-23T00-00-00_code-review-release-re
 
 ### ⚠️ High Priority (strongly recommended)
 
-- [ ] **Improve README.md**
+- [x] **Improve README.md** (2026-07-02)
   - Add installation section with `dotnet add package TimeWarp.Builder`
   - Add requirements section (target framework: .NET 10.0)
   - Add license badge and link to LICENSE file
@@ -45,7 +47,8 @@ Code review report: `.agent/workspace/2026-02-23T00-00-00_code-review-release-re
   - Add design rationale explaining `Also` vs `Apply` distinction
   - Link to GitHub repository
 
-- [ ] **Wire up package icon**
+- [x] **Wire up package icon** — resolved with `logo.png` in `source/Directory.Build.props`; ganda's nuget-package-icon audit check passes
+  - Original suggestion:
   - Add `<PackageIcon>timewarp-builder-avatar.png</PackageIcon>` (convert SVG to PNG if needed, NuGet prefers PNG)
   - Add icon file reference to `.csproj`:
     ```xml
@@ -55,7 +58,7 @@ Code review report: `.agent/workspace/2026-02-23T00-00-00_code-review-release-re
     ```
   - Note: `assets/timewarp-builder-avatar.svg` exists but SVG icons in NuGet packages have limited client support
 
-- [ ] **Prune `Directory.Packages.props`**
+- [x] **Prune `Directory.Packages.props`** (2026-07-02, ganda audit CPM cleanup; Jaribu/Shouldly re-added for tests)
   - Remove unused package groups:
     - Serilog (Logging - Serilog section)
     - OpenTelemetry
@@ -67,14 +70,15 @@ Code review report: `.agent/workspace/2026-02-23T00-00-00_code-review-release-re
   - Keep only packages actually referenced by this library (likely just analyzers and Microsoft.Extensions if needed)
   - Note: `TimeWarp.Builder` self-reference can also be removed
 
-- [ ] **Review AOT warning suppressions**
+- [x] **Review AOT warning suppressions** (2026-07-02) — removed all seven IL* suppressions; both the library build and the dev-cli AOT publish verified clean without them
+  - Original scope:
   - Current global suppressions in `Directory.Build.props`: `IL2026;IL2067;IL2070;IL2075;IL3050;IL2104;IL3053`
   - Evaluate if these are truly needed for this library (it has no reflection/dynamic code)
   - If they are false positives, consider removing the global suppression and testing AOT build
 
 ### Nice to Have (low priority)
 
-- [ ] Add `#region Purpose` / `#region Design` context blocks to source files per csharp skill conventions
+- [x] Add `#region Purpose` / `#region Design` context blocks to source files per csharp skill conventions (2026-07-02)
 - [ ] Add `CHANGELOG.md` for v1.0.0 release notes
 - [ ] Consider `IBuildAsync<T>` interface for async build scenarios (future v1.x)
 
