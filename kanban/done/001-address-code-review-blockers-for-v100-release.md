@@ -79,8 +79,8 @@ Code review report: `.agent/workspace/2026-02-23T00-00-00_code-review-release-re
 ### Nice to Have (low priority)
 
 - [x] Add `#region Purpose` / `#region Design` context blocks to source files per csharp skill conventions (2026-07-02)
-- [ ] Add `CHANGELOG.md` for v1.0.0 release notes
-- [ ] Consider `IBuildAsync<T>` interface for async build scenarios (future v1.x)
+- [x] ~~Add `CHANGELOG.md` for v1.0.0 release notes~~ — decided not needed (2026-07-02); GitHub release notes serve this purpose
+- [x] Consider `IBuildAsync<T>` interface for async build scenarios — split out to backlog task 005 (2026-07-02)
 
 ## Notes
 
