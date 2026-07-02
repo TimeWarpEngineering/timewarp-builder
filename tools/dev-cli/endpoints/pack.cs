@@ -3,6 +3,10 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // Creates NuGet packages for the TimeWarp.Builder library.
 
+#region Purpose
+// 'dev pack' endpoint: packs TimeWarp.Builder into artifacts/packages.
+#endregion
+
 namespace DevCli.Commands;
 
 /// <summary>

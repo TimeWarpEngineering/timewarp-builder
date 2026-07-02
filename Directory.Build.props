@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
 
   <!-- Import repository path definitions -->
@@ -19,6 +20,9 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <IsPackable>false</IsPackable>
+
+    <!-- Required for IDE0005 (unnecessary usings) to run on build -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <!-- Source generator debugging: emit generated files to artifacts directory -->
@@ -68,6 +72,11 @@
   <!-- Banned API enforcement -->
   <ItemGroup Label="Banned API Files">
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+  </ItemGroup>
+
+  <!-- Assembly metadata build tasks -->
+  <ItemGroup Label="Build Tasks">
+    <PackageReference Include="TimeWarp.Build.Tasks" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

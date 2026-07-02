@@ -3,6 +3,10 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // AOT compiles and installs the dev CLI to ./bin for fast execution via direnv PATH.
 
+#region Purpose
+// 'dev self-install' endpoint: AOT-publishes dev.cs to bin/dev for direnv PATH use.
+#endregion
+
 namespace DevCli.Commands;
 
 /// <summary>

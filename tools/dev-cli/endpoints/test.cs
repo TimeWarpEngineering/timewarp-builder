@@ -3,6 +3,10 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // Runs the test suite for TimeWarp.Builder.
 
+#region Purpose
+// 'dev test' endpoint: runs the solution test suite, skipping gracefully when tests/ is absent.
+#endregion
+
 namespace DevCli.Commands;
 
 /// <summary>
@@ -39,9 +43,9 @@ internal sealed class TestCommand : ICommand<Unit>
 
       string testsDirectory = Path.Combine(repoRoot, "tests");
 
-      if (!Directory.Exists(testsDirectory))
+      if (!Directory.Exists(testsDirectory) || !Directory.EnumerateFiles(testsDirectory, "*.cs", SearchOption.AllDirectories).Any())
       {
-        Terminal.WriteLine("No tests directory found. Skipping test step.");
+        Terminal.WriteLine("No tests found. Skipping test step.");
         return Value;
       }
 

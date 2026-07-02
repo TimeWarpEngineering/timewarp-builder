@@ -3,6 +3,10 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // Check or fix code formatting using dotnet format.
 
+#region Purpose
+// 'dev format' endpoint: checks or fixes code style via dotnet format.
+#endregion
+
 namespace DevCli.Commands;
 
 /// <summary>
