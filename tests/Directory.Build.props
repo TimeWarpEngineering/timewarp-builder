@@ -1,0 +1,36 @@
+<Project>
+  <!-- Import parent Directory.Build.props -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <!-- Test idioms that conflict with the library-grade analyzer settings -->
+    <!-- CA1707: Underscores in names - required by the Jaribu naming convention -->
+    <!-- CA1515/CA1812: Public/uninstantiated types - Jaribu discovers tests via reflection -->
+    <!-- CA2007: ConfigureAwait not needed in test runfiles -->
+    <!-- CS1591: XML doc comments not required for tests -->
+    <!-- CA1859: Prefer concrete types - covariance tests intentionally use interface-typed variables -->
+    <!-- CA1861: Inline array literals in assertions - test readability over allocation -->
+    <!-- IDE0058: Discarded expression values - fluent assertions and chained calls -->
+    <!-- IDE0210/IDE0211: Runfiles must use top-level statements -->
+    <!-- RCS1046: Async suffix not used in test method names -->
+    <NoWarn>$(NoWarn);CA1707;CA1515;CA1812;CA1859;CA1861;CA2007;CS1591;IDE0058;IDE0210;IDE0211;RCS1046</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Global usings for Jaribu test runfiles -->
+    <Using Include="System.Collections.Generic" />
+    <Using Include="System.Runtime.CompilerServices" />
+    <Using Include="System.Threading.Tasks" />
+    <Using Include="Shouldly" />
+    <Using Include="TimeWarp.Builder" />
+    <Using Include="TimeWarp.Jaribu" />
+    <Using Include="TimeWarp.Jaribu.TestRunner" Static="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TimeWarp.Jaribu" />
+    <PackageReference Include="Shouldly" />
+    <ProjectReference Include="$(RepositoryRoot)source/timewarp-builder/timewarp-builder.csproj" />
+  </ItemGroup>
+
+</Project>

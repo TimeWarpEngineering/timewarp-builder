@@ -4,7 +4,13 @@
 // Runs the test suite for TimeWarp.Builder.
 
 #region Purpose
-// 'dev test' endpoint: runs the solution test suite, skipping gracefully when tests/ is absent.
+// 'dev test' endpoint: runs each Jaribu test runfile under tests/, skipping gracefully when none exist.
+#endregion
+
+#region Design
+// Tests are standalone Jaribu runfiles (see the jaribu skill), not dotnet-test projects,
+// so each *.cs under tests/ is executed via 'dotnet run' and exit codes are aggregated.
+// --filter maps to the JARIBU_FILTER_TAG environment variable Jaribu uses for tag filtering.
 #endregion
 
 namespace DevCli.Commands;
@@ -15,14 +21,8 @@ namespace DevCli.Commands;
 [NuruRoute("test", Description = "Run the test suite")]
 internal sealed class TestCommand : ICommand<Unit>
 {
-  [Option("filter", "f", Description = "Test filter expression")]
+  [Option("filter", "f", Description = "Jaribu tag filter (sets JARIBU_FILTER_TAG)")]
   public string? Filter { get; set; }
-
-  [Option("no-build", null, Description = "Skip build before testing")]
-  public bool NoBuild { get; set; }
-
-  [Option("verbose", "v", Description = "Verbose output")]
-  public bool Verbose { get; set; }
 
   internal sealed class Handler : ICommandHandler<TestCommand, Unit>
   {
@@ -43,38 +43,52 @@ internal sealed class TestCommand : ICommand<Unit>
 
       string testsDirectory = Path.Combine(repoRoot, "tests");
 
-      if (!Directory.Exists(testsDirectory) || !Directory.EnumerateFiles(testsDirectory, "*.cs", SearchOption.AllDirectories).Any())
+      string[] testFiles = Directory.Exists(testsDirectory)
+        ? [.. Directory.GetFiles(testsDirectory, "*.cs", SearchOption.AllDirectories).Order(StringComparer.Ordinal)]
+        : [];
+
+      if (testFiles.Length == 0)
       {
         Terminal.WriteLine("No tests found. Skipping test step.");
         return Value;
       }
 
-      Terminal.WriteLine("Running TimeWarp.Builder tests...");
+      Terminal.WriteLine($"Running {testFiles.Length} Jaribu test file(s)...");
       Terminal.WriteLine($"Working from: {repoRoot}");
 
-      ShellBuilder testBuilder = Shell.Builder("dotnet")
-        .WithArguments("test", Path.Combine(repoRoot, "timewarp-builder.slnx"), "--verbosity", command.Verbose ? "normal" : "minimal");
+      int failedCount = 0;
 
-      if (command.NoBuild)
+      foreach (string testFile in testFiles)
       {
-        testBuilder = testBuilder.WithArguments("--no-build");
+        string relativePath = Path.GetRelativePath(repoRoot, testFile);
+        Terminal.WriteLine($"\n▶ {relativePath}");
+
+        ShellBuilder runBuilder = Shell.Builder("dotnet")
+          .WithArguments("run", testFile)
+          .WithNoValidation();
+
+        if (command.Filter is not null)
+        {
+          runBuilder = runBuilder.WithEnvironmentVariable("JARIBU_FILTER_TAG", command.Filter);
+        }
+
+        int exitCode = await runBuilder.RunAsync();
+
+        if (exitCode != 0)
+        {
+          failedCount++;
+          Terminal.WriteErrorLine($"❌ Failed: {relativePath}");
+        }
       }
 
-      if (command.Filter is not null)
+      if (failedCount > 0)
       {
-        testBuilder = testBuilder.WithArguments("--filter", command.Filter);
-      }
-
-      int exitCode = await testBuilder.WithNoValidation().RunAsync();
-
-      if (exitCode != 0)
-      {
-        Environment.ExitCode = exitCode;
-        Terminal.WriteErrorLine($"Tests failed with exit code {exitCode}");
+        Environment.ExitCode = 1;
+        Terminal.WriteErrorLine($"\n❌ {failedCount} of {testFiles.Length} test file(s) failed");
         return Value;
       }
 
-      Terminal.WriteLine("\n✅ Tests completed successfully!");
+      Terminal.WriteLine($"\n✅ All {testFiles.Length} test file(s) passed!");
       return Value;
     }
   }

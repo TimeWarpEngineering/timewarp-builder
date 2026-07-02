@@ -1,3 +1,13 @@
+#region Purpose
+// Contract for standalone builders that produce their configured object via Build().
+#endregion
+
+#region Design
+// TBuilt is covariant (out) so an IBuilder<Derived> is usable where an IBuilder<Base> is
+// expected. Builders that finish by returning to a parent context instead implement
+// INestedBuilder<TParent>; the two interfaces are intentionally minimal and independent.
+#endregion
+
 namespace TimeWarp.Builder;
 
 /// <summary>

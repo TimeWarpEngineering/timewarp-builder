@@ -1,3 +1,14 @@
+#region Purpose
+// Contract for nested builders that finish via Done() and return control to a parent builder.
+#endregion
+
+#region Design
+// Done() bundles three steps: build the child, hand the result to the parent, return the
+// parent — enabling deep fluent chains without the caller juggling intermediate results.
+// TParent is covariant (out) and constrained to class; nested builders typically wrap a
+// standalone IBuilder<TBuilt> internally (see TimeWarp.Nuru's NestedCompiledRouteBuilder).
+#endregion
+
 namespace TimeWarp.Builder;
 
 /// <summary>

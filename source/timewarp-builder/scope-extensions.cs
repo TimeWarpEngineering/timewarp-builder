@@ -1,3 +1,15 @@
+#region Purpose
+// Kotlin-inspired scope extension methods (Also, Apply, Let, Run) for fluent object manipulation.
+#endregion
+
+#region Design
+// Also and Apply share an implementation; they exist separately to signal intent at the call
+// site (Apply = configuration, Also = incidental side effect), mirroring Kotlin's apply/also.
+// T is deliberately unconstrained so the extensions attach to every type — any object can join
+// a fluent chain without its type opting in; the IntelliSense noise is the accepted trade-off.
+// Delegates are null-guarded; the receiver is not, matching BCL extension-method convention.
+#endregion
+
 namespace TimeWarp.Builder;
 
 /// <summary>
