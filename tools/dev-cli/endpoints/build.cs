@@ -3,6 +3,10 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // Builds the TimeWarp.Builder library.
 
+#region Purpose
+// 'dev build' endpoint: compiles source/timewarp-builder via dotnet build.
+#endregion
+
 namespace DevCli.Commands;
 
 /// <summary>

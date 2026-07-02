@@ -13,7 +13,9 @@
     <!-- CA2016: CancellationToken forwarding - will address where needed -->
     <!-- CA2000: Dispose on app builder - handled by framework -->
     <!-- RCS1046: Async suffix - private methods don't need it -->
-    <NoWarn>$(NoWarn);CA1031;CA1303;CA1508;CA1515;CA1849;CA2007;CA2016;CA2000;RCS1046</NoWarn>
+    <!-- IDE0211: Program.Main style - dev.cs is a runfile and must use top-level statements -->
+    <!-- CS1591: XML doc comments not required for CLI tool internals -->
+    <NoWarn>$(NoWarn);CA1031;CA1303;CA1508;CA1515;CA1849;CA2007;CA2016;CA2000;RCS1046;IDE0211;CS1591</NoWarn>
 
     <!-- AOT Support -->
     <PublishAot>true</PublishAot>

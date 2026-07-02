@@ -8,6 +8,10 @@
 //   pr/merge:  clean -> build -> test
 //   release:   clean -> build -> check-version -> pack -> push
 
+#region Purpose
+// 'dev workflow' endpoint: orchestrates the CI/CD pipeline (pr/merge: clean-build-test; release adds version check, pack, and NuGet push).
+#endregion
+
 namespace DevCli.Commands;
 
 using System.Xml.Linq;
@@ -145,7 +149,7 @@ internal sealed class CiCommand : ICommand<Unit>
       Terminal.WriteLine("===============================================================================");
       Terminal.WriteLine("  Step 3/5: Check Version");
       Terminal.WriteLine("===============================================================================");
-      await CheckVersionAsync(repoRoot);
+      await CheckVersionAsync();
 
       // Step 4: Pack
       Terminal.WriteLine("");
@@ -168,38 +172,15 @@ internal sealed class CiCommand : ICommand<Unit>
       Terminal.WriteLine("===============================================================================");
     }
 
-    private async Task CheckVersionAsync(string repoRoot)
+    private async Task CheckVersionAsync()
     {
-      string propsPath = Path.Combine(repoRoot, "source", "Directory.Build.props");
+      CheckVersionCommand.Handler checkVersionHandler = new(Terminal);
+      await checkVersionHandler.Handle(new CheckVersionCommand(), CancellationToken.None);
 
-      if (!File.Exists(propsPath))
+      if (Environment.ExitCode != 0)
       {
-        throw new FileNotFoundException($"Could not find {propsPath}");
+        throw new InvalidOperationException("Version check failed. Aborting release.");
       }
-
-      XDocument doc = XDocument.Load(propsPath);
-      string? version = doc.Descendants("Version").FirstOrDefault()?.Value;
-
-      if (string.IsNullOrEmpty(version))
-      {
-        throw new InvalidOperationException("Could not find version in source/Directory.Build.props");
-      }
-
-      Terminal.WriteLine($"Checking if TimeWarp.Builder {version} is already published on NuGet.org...");
-
-      CommandOutput result = await Shell.Builder("dotnet")
-        .WithArguments("package", "search", "TimeWarp.Builder", "--exact-match", "--prerelease", "--source", "https://api.nuget.org/v3/index.json")
-        .WithNoValidation()
-        .CaptureAsync();
-
-      if (result.Stdout.Contains($"| {version} |", StringComparison.Ordinal))
-      {
-        Terminal.WriteErrorLine($"TimeWarp.Builder {version} is already published. Increment the version in source/Directory.Build.props.");
-        Environment.ExitCode = 1;
-        throw new InvalidOperationException($"Version {version} already published.");
-      }
-
-      Terminal.WriteLine($"✅ TimeWarp.Builder {version} is not yet published. Ready to release.");
     }
 
     private async Task PushPackagesAsync(string repoRoot, string? apiKey)

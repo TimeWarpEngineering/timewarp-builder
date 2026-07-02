@@ -3,6 +3,10 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // Cleans the TimeWarp.Builder project and deletes all bin/obj directories.
 
+#region Purpose
+// 'dev clean' endpoint: runs dotnet clean and deletes bin/obj directories (sparing the dev CLI's own).
+#endregion
+
 namespace DevCli.Commands;
 
 /// <summary>
@@ -48,12 +52,13 @@ internal sealed class CleanCommand : ICommand<Unit>
       }
 
       // Also delete obj and bin directories for a thorough clean
+      // (sparing the dev CLI's own directories and the repo-root bin that holds the installed dev binary)
       Terminal.WriteLine("\nDeleting obj and bin directories...");
       string[] directoriesToDelete =
       [
         .. Directory.GetDirectories(repoRoot, "obj", SearchOption.AllDirectories)
           .Concat(Directory.GetDirectories(repoRoot, "bin", SearchOption.AllDirectories))
-          .Where(d => !d.Contains(Path.Combine("tools", "dev-cli"))),
+          .Where(d => !d.Contains(Path.Combine("tools", "dev-cli")) && d != Path.Combine(repoRoot, "bin")),
       ];
 
       foreach (string dir in directoriesToDelete)

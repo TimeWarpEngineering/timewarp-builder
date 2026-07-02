@@ -416,3 +416,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# MemSearch local index data (machine-specific; .memsearch.toml is tracked)
+.memsearch/
