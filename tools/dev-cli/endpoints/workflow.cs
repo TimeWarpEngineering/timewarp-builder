@@ -31,10 +31,23 @@ internal sealed class CiCommand : ICommand<Unit>
   internal sealed class Handler : ICommandHandler<CiCommand, Unit>
   {
     private readonly ITerminal Terminal;
+    private readonly IRepoCleanService RepoCleanService;
+    private readonly NuGetVersionService NuGetVersionService;
+    private readonly IRepoConfigService ConfigService;
+    private readonly IPackableProjectService PackableProjectService;
 
-    public Handler(ITerminal terminal)
+    public Handler(
+      ITerminal terminal,
+      IRepoCleanService repoCleanService,
+      NuGetVersionService nuGetVersionService,
+      IRepoConfigService configService,
+      IPackableProjectService packableProjectService)
     {
       Terminal = terminal;
+      RepoCleanService = repoCleanService;
+      NuGetVersionService = nuGetVersionService;
+      ConfigService = configService;
+      PackableProjectService = packableProjectService;
     }
 
     public async ValueTask<Unit> Handle(CiCommand command, CancellationToken ct)
@@ -96,7 +109,7 @@ internal sealed class CiCommand : ICommand<Unit>
       Terminal.WriteLine("===============================================================================");
       Terminal.WriteLine("  Step 1/3: Clean");
       Terminal.WriteLine("===============================================================================");
-      CleanCommand.Handler cleanHandler = new(Terminal);
+      CleanCommand.Handler cleanHandler = new(Terminal, RepoCleanService);
       await cleanHandler.Handle(new CleanCommand(), CancellationToken.None);
 
       // Step 2: Build
@@ -133,7 +146,7 @@ internal sealed class CiCommand : ICommand<Unit>
       Terminal.WriteLine("===============================================================================");
       Terminal.WriteLine("  Step 1/5: Clean");
       Terminal.WriteLine("===============================================================================");
-      CleanCommand.Handler cleanHandler = new(Terminal);
+      CleanCommand.Handler cleanHandler = new(Terminal, RepoCleanService);
       await cleanHandler.Handle(new CleanCommand(), CancellationToken.None);
 
       // Step 2: Build
@@ -174,7 +187,7 @@ internal sealed class CiCommand : ICommand<Unit>
 
     private async Task CheckVersionAsync()
     {
-      CheckVersionCommand.Handler checkVersionHandler = new(Terminal);
+      CheckVersionCommand.Handler checkVersionHandler = new(Terminal, NuGetVersionService, ConfigService, PackableProjectService);
       await checkVersionHandler.Handle(new CheckVersionCommand(), CancellationToken.None);
 
       if (Environment.ExitCode != 0)
@@ -225,9 +238,3 @@ internal sealed class CiCommand : ICommand<Unit>
   }
 }
 
-internal enum CiMode
-{
-  Pr,
-  Merge,
-  Release
-}

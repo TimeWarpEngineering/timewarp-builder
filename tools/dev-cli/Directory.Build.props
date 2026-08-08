@@ -15,10 +15,12 @@
     <!-- RCS1046: Async suffix - private methods don't need it -->
     <!-- IDE0211: Program.Main style - dev.cs is a runfile and must use top-level statements -->
     <!-- CS1591: XML doc comments not required for CLI tool internals -->
-    <NoWarn>$(NoWarn);CA1031;CA1303;CA1508;CA1515;CA1849;CA2007;CA2016;CA2000;RCS1046;IDE0211;CS1591</NoWarn>
+    <NoWarn>$(NoWarn);CA1031;CA1303;CA1508;CA1515;CA1849;CA2007;CA2016;CA2000;CA1034;CA5399;RCS1046;IDE0005;IDE0022;IDE0046;IDE0055;IDE0058;IDE0065;IDE0066;IDE0078;IDE0160;IDE0211;CS1591;IL2026;IL2104;IL3050;IL3053</NoWarn>
 
     <!-- AOT Support -->
     <PublishAot>true</PublishAot>
+    <!-- DevCli package content is style-validated in nuru; do not re-enforce consumer IDE rules on it -->
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
     <InvariantGlobalization>true</InvariantGlobalization>
 
     <!-- Enable interceptors for TimeWarp.Nuru source generator -->
@@ -39,17 +41,22 @@
     <Using Include="TimeWarp.Nuru.Unit" Static="true" />
     <Using Include="TimeWarp.Amuru" />
     <Using Include="TimeWarp.Terminal" />
+    <Using Include="DevCli" />
+    <Using Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Include endpoint files in compilation -->
-    <Compile Include="endpoints/**/*.cs" />
+    <Compile Include="endpoints/**/*.cs" Exclude="endpoints/clean.cs;endpoints/check-version.cs;endpoints/self-install.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Package references -->
     <PackageReference Include="TimeWarp.Nuru" />
+    <PackageReference Include="TimeWarp.Nuru.DevCli" />
     <PackageReference Include="TimeWarp.Amuru" />
+    <PackageReference Include="TimeWarp.Amuru.Tools" />
+    <PackageReference Include="TimeWarp.Terminal" />
   </ItemGroup>
 
 </Project>
