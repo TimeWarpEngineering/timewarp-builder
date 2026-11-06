@@ -3,6 +3,9 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
   <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+
     <!-- Test idioms that conflict with the library-grade analyzer settings -->
     <!-- CA1707: Underscores in names - required by the Jaribu naming convention -->
     <!-- CA1515/CA1812: Public/uninstantiated types - Jaribu discovers tests via reflection -->

@@ -15,7 +15,7 @@ dotnet add package TimeWarp.Builder --prerelease
 
 ## Requirements
 
-- .NET 10.0 or later
+- net10.0 and net11.0
 - Fully AOT- and trim-compatible (no reflection, no dynamic code)
 
 ## Interfaces
