@@ -3,7 +3,7 @@
 [![NuGet](https://img.shields.io/nuget/vpre/TimeWarp.Builder.svg)](https://www.nuget.org/packages/TimeWarp.Builder)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/TimeWarp.Builder.svg)](https://www.nuget.org/packages/TimeWarp.Builder)
 [![CI/CD](https://github.com/TimeWarpEngineering/timewarp-builder/actions/workflows/workflow.yml/badge.svg)](https://github.com/TimeWarpEngineering/timewarp-builder/actions/workflows/workflow.yml)
-[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](LICENSE)
+[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](license)
 
 Fluent builder interfaces and Kotlin-inspired scope extensions for .NET.
 
@@ -123,4 +123,4 @@ dotnet run tests/scope-extensions.also.cs
 
 ## Unlicense
 
-This is free and unencumbered software released into the public domain — see [LICENSE](LICENSE).
+This is free and unencumbered software released into the public domain — see [license](license).

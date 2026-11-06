@@ -26,7 +26,7 @@ internal sealed class CheckVersionCommand : ICommand<Unit>
       Terminal = terminal;
     }
 
-    public async ValueTask<Unit> Handle(CheckVersionCommand command, CancellationToken ct)
+    public async Task<Unit> Handle(CheckVersionCommand command, CancellationToken ct)
     {
       string? repoRoot = Git.FindRoot() ??
         throw new InvalidOperationException("Could not find git repository root (.git not found)");

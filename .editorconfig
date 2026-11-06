@@ -30,7 +30,7 @@ resharper_convert_to_primary_constructor_highlighting = do_not_show
 
 # Development files
 [*.{cs,csx,cshtml,csproj,razor,sln,props,targets,json,yml,gitignore,}]
-charset = "utf-8"
+charset = utf-8
 trim_trailing_whitespace = true
 
 #### .NET Coding Conventions ####
@@ -425,3 +425,5 @@ dotnet_diagnostic.IDE0290.severity = none
 
 # IDE1006: Naming Styles
 dotnet_diagnostic.IDE1006.severity = none
+# TW0007 file-level usings (TimeWarp.SourceGenerators)
+dotnet_diagnostic.TW0007.filename = global-usings.cs

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project>
   <!-- Import parent Directory.Build.props -->
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
@@ -10,6 +11,7 @@
     <PackageLicenseExpression>Unlicense</PackageLicenseExpression>
     <PackageIcon>logo.png</PackageIcon>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PackageProjectUrl>https://timewarp.software/projects/timewarp-builder/</PackageProjectUrl>
   </PropertyGroup>
 
   <PropertyGroup Label="MsBuild Packaging Defaults">

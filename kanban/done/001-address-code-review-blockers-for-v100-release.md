@@ -4,7 +4,7 @@
 
 Resolve all blockers and high-priority items identified in the comprehensive code review to prepare TimeWarp.Builder for an official v1.0.0 release.
 
-Code review report: `.agent/workspace/2026-02-23T00-00-00_code-review-release-readiness.md`
+Code review report: `.agent/workspace/2026-02-23-t00-00-00-code-review-release-readiness.md`
 
 ## Checklist
 
