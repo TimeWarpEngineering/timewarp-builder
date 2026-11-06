@@ -46,14 +46,17 @@ must be empty. Audit check PASSes. Do not implement on `master`.
 - [ ] Audit `routine-journals-gitignore` PASSes
 - [ ] `git check-ignore -v` confirms ignore; porcelain does not list journals
 - [ ] Do not implement on `master`
+- [x] archived, not relevant anymore
 
 ## Notes
 
 - Predecessor: ganda 262; consumer precedent architecture 208, software 034
 - 262 out-of-scope (“do not sweep every org repo”) is why this kitchen exists.
+- Archived because it is not relevant anymore (user 2026-11-07). Renumbered from 006 so the done trusted-publishing kitchen keeps 006.
 
 ## Session
 
 - Created: grok `01a06304-cbf6-7d83-b5a2-4a99e9d09d40` (2026-09-03) cockpit timewarp-flow
 - Trigger: `/tw-merge` software 033 dirty-gc; 262 left consumer sweep out of scope
 - Pattern: `*.journal.json` (cockpit, 2026-09-03) — one glob, not six names
+- Archived because it is not relevant anymore (user 2026-11-07). Renumbered from 006 so the done trusted-publishing kitchen keeps 006.
