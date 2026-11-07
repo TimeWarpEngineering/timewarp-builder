@@ -2,11 +2,11 @@
 
 ## Budget (by-diff)
 
-- Lines changed: 466
-- Effort: 2
+- Lines changed: 101
+- Effort: 1
 - TCB hits: none
 - Roster axes: general
-- Turn cap: 120 (--max-turns; cursor uncapped)
+- Turn cap: 80 (--max-turns; cursor uncapped)
 
 ## Scope — task 007
 
@@ -16,6 +16,13 @@
 **Plan / brief:** multi-target the library on net10.0 and net11.0. Keep the dev CLI and the Jaribu runfiles on one target framework. Archive the obsolete 006 journal kitchen as 008. Clear the `ganda repo audit` errors. Bump the version to 1.1.0.
 **Effort:** 2 (by-diff budget). The roster is general only.
 **Reviewer roster:** general
+**Session IDs:** review oracle Claude Opus 5.5 (claude-opus-5-5). This headless run did not expose a session id.
+
+## Scope — round 2
+
+**Date:** 2026-11-07
+**Diff scope:** the delta since round 1 base `3b983eb` (`3b983eb..HEAD`). That is `edc9d63`, the CI SDK fix in `.github/workflows/workflow.yml`, plus the kanban records.
+**Effort:** 1 (by-diff budget, 101 lines). The roster is general only.
 **Session IDs:** review oracle Claude Opus 5.5 (claude-opus-5-5). This headless run did not expose a session id.
 
 ## Ground rules
