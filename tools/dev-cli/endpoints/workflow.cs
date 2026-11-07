@@ -37,7 +37,7 @@ internal sealed class CiCommand : ICommand<Unit>
       Terminal = terminal;
     }
 
-    public async ValueTask<Unit> Handle(CiCommand command, CancellationToken ct)
+    public async Task<Unit> Handle(CiCommand command, CancellationToken ct)
     {
       CiMode mode = DetermineMode(command.Mode);
 

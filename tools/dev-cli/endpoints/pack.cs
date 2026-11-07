@@ -30,7 +30,7 @@ internal sealed class PackCommand : ICommand<Unit>
       Terminal = terminal;
     }
 
-    public async ValueTask<Unit> Handle(PackCommand command, CancellationToken ct)
+    public async Task<Unit> Handle(PackCommand command, CancellationToken ct)
     {
       string? repoRoot = Git.FindRoot() ??
         throw new InvalidOperationException("Could not find git repository root (.git not found)");

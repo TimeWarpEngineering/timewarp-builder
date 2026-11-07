@@ -33,7 +33,7 @@ internal sealed class TestCommand : ICommand<Unit>
       Terminal = terminal;
     }
 
-    public async ValueTask<Unit> Handle(TestCommand command, CancellationToken ct)
+    public async Task<Unit> Handle(TestCommand command, CancellationToken ct)
     {
       string? repoRoot = Git.FindRoot() ?? throw new InvalidOperationException("Could not find git repository root (.git not found)");
       if (!File.Exists(Path.Combine(repoRoot, "timewarp-builder.slnx")))

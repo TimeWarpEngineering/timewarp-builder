@@ -30,7 +30,7 @@ internal sealed class BuildCommand : ICommand<Unit>
       Terminal = terminal;
     }
 
-    public async ValueTask<Unit> Handle(BuildCommand command, CancellationToken ct)
+    public async Task<Unit> Handle(BuildCommand command, CancellationToken ct)
     {
       string? repoRoot = Git.FindRoot() ??
         throw new InvalidOperationException("Could not find git repository root (.git not found)");

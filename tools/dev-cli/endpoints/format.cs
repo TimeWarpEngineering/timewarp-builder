@@ -30,7 +30,7 @@ internal sealed class FormatCommand : ICommand<Unit>
       Terminal = terminal;
     }
 
-    public async ValueTask<Unit> Handle(FormatCommand command, CancellationToken ct)
+    public async Task<Unit> Handle(FormatCommand command, CancellationToken ct)
     {
       string? repoRoot = Git.FindRoot();
 
