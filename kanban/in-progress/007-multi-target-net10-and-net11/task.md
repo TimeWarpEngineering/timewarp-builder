@@ -39,8 +39,12 @@ Acceptance:
 - 2026-11-07: user asked to launch this task, run `ganda repo audit`, and roll the result into 007. Re-ran the audit on this worktree before the walk. It passes. There is no new audit diff to commit. Do not open a sibling task for audit.
 - Implementer: grok session 01a1b3c6-a57d-73a1-858e-d6a8d75a9fc9 (2026-11-07). Verified the multi-target build, tests, and audit, then set the package version to 1.1.0 because 1.0.0 is already tagged and on NuGet.org.
 - Implement oracle: implemented by implementer-grok (grok, vendor xai, model grok-4.7, response model grok-4.7-build), session 01a1b3c6-a57d-73a1-858e-d6a8d75a9fc9, max-turns 500, Done — 2026-11-07T02:20:31Z
+- Review oracle round 1: reviewer-claude (Claude Opus 5.5, claude-opus-5-5) ran at effort 2 with a general-only roster, on 2026-11-07. It found 1 open bug (M1: CI installs only the .NET 10 SDK, so net11.0 fails with NETSDK1045) and requested a fix pass. Artifacts: `review/review-framework.md`, `review/round-1/general.md`, `review/round-1/merged.md`.
+- Review oracle: review by reviewer-claude (claude, vendor anthropic, model claude-opus-5-5, response model claude-opus-5-5), session 51443732-830e-4de6-af80-9da31cb89bb4, max-turns 120, artifacts general.md, merged.md — 2026-11-07T02:22:53Z
 
 ## Results
+
+- Review (in progress): round 1 ran with a general reviewer at effort 2. Counts: bug 1 open, suggestion 0, nit 0. There is no disposition yet. M1 must be fixed, then reviewed in round 2. See `review/round-1/merged.md`.
 
 - The library target frameworks are `net10.0;net11.0` in the root `Directory.Build.props`. `./bin/dev build` (Release) produced `TimeWarp.Builder.dll` for both frameworks and packed `artifacts/packages/TimeWarp.Builder.1.1.0.nupkg` with `lib/net10.0` and `lib/net11.0`. 0 warnings, 0 errors.
 - The dev CLI and the Jaribu runfiles stay on `net10.0`. `tools/dev-cli/Directory.Build.props` and `tests/Directory.Build.props` set `TargetFramework` to net10.0 and clear `TargetFrameworks`. `./bin/dev test` ran all 6 runfiles and all passed.
@@ -66,3 +70,7 @@ git diff origin/master -- kanban/done/006-add-trusted-publishing-probe-mode-to-w
 **Automated gate:** `./bin/dev build` and `./bin/dev test` from the repo root.
 
 **Not in scope:** pushing the package to NuGet.org. That is the release cut after this branch merges. Confirm the published version with `dotnet package search TimeWarp.Builder --exact-match --prerelease --source https://api.nuget.org/v3/index.json`, not with `./bin/dev check-version`, until that column match is fixed.
+
+## Review
+
+- Round 1: Blocked — open M1
