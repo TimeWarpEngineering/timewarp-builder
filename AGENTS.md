@@ -16,7 +16,7 @@ dotnet test                     # Run all tests (if any test projects exist)
 - **Using statements**: Inside namespace, not at file level
 - **Nullability**: Enabled everywhere - use nullable reference types
 - **AOT compatible**: All code must be AOT-compatible
-- **Target framework**: net10.0 and net11.0
+- **Target framework**: the library ships net10.0 and net11.0 until .NET 11 is GA. The dev CLI and tests target net11.0.
 
 ## Project Structure
 - Main library: `source/timewarp-builder/`
