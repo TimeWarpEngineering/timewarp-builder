@@ -6,12 +6,12 @@ TimeWarp.Builder currently targets only net10.0. Ship the library for net10.0 an
 
 ## Goal (implementer restatement)
 
-Ship TimeWarp.Builder so the library compiles and packs for both net10.0 and net11.0, and so the GitHub Actions workflow can build that net11.0 target. Keep the dev CLI and the Jaribu test runfiles on one framework so those executables still run. The open journal-ignore kitchen that reused id 006 is obsolete: archive it as 008, and leave the finished trusted-publishing kitchen that already owns id 006 in done. `ganda repo audit` must report no Error on this worktree.
+Ship TimeWarp.Builder so the library compiles and packs for both net10.0 and net11.0 until .NET 11 is GA, and so the GitHub Actions workflow can build that net11.0 target. The dev CLI and the Jaribu test runfiles target net11.0, which is the forward framework. The open journal-ignore kitchen that reused id 006 is obsolete: archive it as 008, and leave the finished trusted-publishing kitchen that already owns id 006 in done. `ganda repo audit` must report no Error on this worktree.
 
 Acceptance:
 
 - The library's target frameworks are net10.0 and net11.0.
-- The dev CLI and the test runfiles stay on a single target framework.
+- The dev CLI and the test runfiles target net11.0. The library keeps net10.0 and net11.0 until .NET 11 is GA.
 - The obsolete to-do 006 journal kitchen is archived as 008.
 - The done 006 trusted-publishing kitchen is unchanged.
 - `ganda repo audit` has no Error.
@@ -23,7 +23,7 @@ Acceptance:
 ## Checklist
 
 - [x] Library TargetFrameworks is net10.0;net11.0
-- [x] Dev CLI and test runfiles stay single-TFM so they still run
+- [x] Dev CLI and test runfiles target net11.0
 - [x] Obsolete to-do 006 journal kitchen archived as 008
 - [x] Done 006 trusted-publishing kitchen unchanged
 - [x] ganda repo audit has no Error
@@ -46,6 +46,7 @@ Acceptance:
 - Fix pass (implement-fix-2): grok session 01a1b3d0-e290-7a40-9524-f14af99b01a4 (2026-11-07). M1: the workflow now installs .NET 10.0.x and .NET 11.0.x. Preview quality is only on the 11 step, because one step applies that input to every version and the 10.0 preview channel is still 10.0.100-rc.2. The v4 install script dry-run resolves channel 10.0 to 10.0.403 and channel 11.0 with preview quality to 11.0.100-rc.3.26522.148. `./bin/dev build` and `./bin/dev test` passed on that RC SDK. `ganda kanban reconcile` landed the kitchen. `ganda repo audit` then passed: Passed 37, Failed 0, Skipped 3.
 - Review oracle round 2: reviewer-claude (Claude Opus 5.5, claude-opus-5-5) ran at effort 1 with a general-only roster, turn cap 80, on 2026-11-07. It re-verified M1 as fixed and found no new issues. Disposition is clean. Artifacts: `review/round-2/general.md`, `review/round-2/merged.md`, `review/disposition.md`.
 - Installed ganda changed during this walk: was 50128416 bytes 0ae910dc29e1318d800d9595d8d3462a946a1af23b0e841a6f5d3c20b91354a8; now 50128416 bytes 6ee9d7151768bb3ee32bb86afcd1f647f65d076cab7eb76aa698982f2e8657b2
+- 2026-11-07: the net10.0 pin on the dev CLI and tests was a local choice, not a Nuru requirement. Nuru's repo targets net11.0. The published Nuru 4.0.0-beta.11 package still ships only `lib/net10.0`, and a net11.0 app can reference that asset. The user said the library ships both frameworks until .NET 11 is official, and net11.0 is the forward target for the dev CLI and tests.
 
 ## Results
 
@@ -53,7 +54,7 @@ Acceptance:
 
 - Round 1 M1 is fixed in `.github/workflows/workflow.yml`. Setup .NET 10 installs `10.0.x` with no quality. Setup .NET 11 installs `11.0.x` with `dotnet-quality: preview`. The same step cannot carry preview quality for both, because that input applies to every version and the 10.0 preview channel still resolves to SDK 10.0.100-rc.2.25502.107. A dry-run of the `actions/setup-dotnet` v4.3.1 `install-dotnet.sh` resolves `--channel 10.0` to SDK 10.0.403 and `--channel 11.0 --quality preview` to SDK 11.0.100-rc.3.26522.148. The net11.0 asset is built with that RC SDK until .NET 11 reaches GA. Round 2 verified the fix. See `review/round-1/merged.md`.
 - The library target frameworks are `net10.0;net11.0` in the root `Directory.Build.props`. `./bin/dev build` (Release) on SDK 11.0.100-rc.3.26522.148 produced `TimeWarp.Builder.dll` for both frameworks and packed `artifacts/packages/TimeWarp.Builder.1.1.0.nupkg` with `lib/net10.0` and `lib/net11.0`. 0 warnings, 0 errors. Re-run on 2026-11-07 during the fix pass: same result.
-- The dev CLI and the Jaribu runfiles stay on `net10.0`. `tools/dev-cli/Directory.Build.props` and `tests/Directory.Build.props` set `TargetFramework` to net10.0 and clear `TargetFrameworks`. `./bin/dev test` ran all 6 runfiles and all passed. Re-run on 2026-11-07 during the fix pass: all 6 passed.
+- The dev CLI and the Jaribu runfiles target `net11.0`. The library keeps both frameworks until .NET 11 is GA. `tools/dev-cli/Directory.Build.props` and `tests/Directory.Build.props` set `TargetFramework` to net11.0 and clear `TargetFrameworks`.
 - The obsolete journal-ignore kitchen is `kanban/archived/008-ignore-routine-journals-so-worktree-gc-is-not-dirty/`. The done trusted-publishing kitchen `kanban/done/006-add-trusted-publishing-probe-mode-to-workflowyml.md` has no diff against master.
 - `ganda repo audit` on this worktree: Passed 37, Failed 0, Skipped 3. Re-run after the CI fix and `ganda kanban reconcile`: same counts, including `kanban-landed`.
 - Package version is 1.1.0 in `source/Directory.Build.props`. GitHub release `v1.0.0` exists, and `dotnet package search` lists `TimeWarp.Builder` 1.0.0 on nuget.org. `./bin/dev check-version` still prints ready for 1.0.0 because it looks for `| 1.0.0 |` and the search table pads the version column (`| 1.0.0        |`).
@@ -74,7 +75,7 @@ bash /tmp/install-dotnet-v4.sh --channel 10.0 --dry-run
 bash /tmp/install-dotnet-v4.sh --channel 11.0 --quality preview --dry-run
 ```
 
-**Expect:** Build succeeds with 0 warnings and writes `source/timewarp-builder/bin/Release/net10.0/TimeWarp.Builder.dll` and `source/timewarp-builder/bin/Release/net11.0/TimeWarp.Builder.dll`. The package lists `lib/net10.0/TimeWarp.Builder.dll` and `lib/net11.0/TimeWarp.Builder.dll`. All 6 Jaribu runfiles pass. Audit reports Failed: 0. The done 006 diff is empty. `kanban/archived/008-ignore-routine-journals-so-worktree-gc-is-not-dirty/task.md` is present. `tools/dev-cli/Directory.Build.props` and `tests/Directory.Build.props` contain `<TargetFramework>net10.0</TargetFramework>` and an empty `<TargetFrameworks>`. The workflow has a Setup .NET 10 step with `dotnet-version: '10.0.x'` and no `dotnet-quality`, and a Setup .NET 11 step with `dotnet-version: '11.0.x'` and `dotnet-quality: 'preview'`. The 10.0 dry-run names SDK 10.0.403. The 11.0 preview dry-run names SDK 11.0.100-rc.3.26522.148. GitHub Actions on the pull request is the run that proves the hosted runner; this walk does not open the pull request.
+**Expect:** Build succeeds with 0 warnings and writes `source/timewarp-builder/bin/Release/net10.0/TimeWarp.Builder.dll` and `source/timewarp-builder/bin/Release/net11.0/TimeWarp.Builder.dll`. The package lists `lib/net10.0/TimeWarp.Builder.dll` and `lib/net11.0/TimeWarp.Builder.dll`. All 6 Jaribu runfiles pass. Audit reports Failed: 0. The done 006 diff is empty. `kanban/archived/008-ignore-routine-journals-so-worktree-gc-is-not-dirty/task.md` is present. `tools/dev-cli/Directory.Build.props` and `tests/Directory.Build.props` contain `<TargetFramework>net11.0</TargetFramework>` and an empty `<TargetFrameworks>`. The workflow has a Setup .NET 10 step with `dotnet-version: '10.0.x'` and no `dotnet-quality`, and a Setup .NET 11 step with `dotnet-version: '11.0.x'` and `dotnet-quality: 'preview'`. The 10.0 dry-run names SDK 10.0.403. The 11.0 preview dry-run names SDK 11.0.100-rc.3.26522.148. GitHub Actions on the pull request is the run that proves the hosted runner; this walk does not open the pull request.
 
 **Automated gate:** `./bin/dev build` and `./bin/dev test` from the repo root.
 
