@@ -38,6 +38,7 @@ Acceptance:
 - Library build produced net10.0 and net11.0. Dev CLI and the six Jaribu runfiles stayed on net10.0 and passed.
 - 2026-11-07: user asked to launch this task, run `ganda repo audit`, and roll the result into 007. Re-ran the audit on this worktree before the walk. It passes. There is no new audit diff to commit. Do not open a sibling task for audit.
 - Implementer: grok session 01a1b3c6-a57d-73a1-858e-d6a8d75a9fc9 (2026-11-07). Verified the multi-target build, tests, and audit, then set the package version to 1.1.0 because 1.0.0 is already tagged and on NuGet.org.
+- Implement oracle: implemented by implementer-grok (grok, vendor xai, model grok-4.7, response model grok-4.7-build), session 01a1b3c6-a57d-73a1-858e-d6a8d75a9fc9, max-turns 500, Done — 2026-11-07T02:20:31Z
 
 ## Results
 
