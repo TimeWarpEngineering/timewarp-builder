@@ -45,6 +45,7 @@ Acceptance:
 - Review oracle: review by reviewer-claude (claude, vendor anthropic, model claude-opus-5-5, response model claude-opus-5-5), session 51443732-830e-4de6-af80-9da31cb89bb4, max-turns 120, artifacts general.md, merged.md — 2026-11-07T02:22:53Z
 - Fix pass (implement-fix-2): grok session 01a1b3d0-e290-7a40-9524-f14af99b01a4 (2026-11-07). M1: the workflow now installs .NET 10.0.x and .NET 11.0.x. Preview quality is only on the 11 step, because one step applies that input to every version and the 10.0 preview channel is still 10.0.100-rc.2. The v4 install script dry-run resolves channel 10.0 to 10.0.403 and channel 11.0 with preview quality to 11.0.100-rc.3.26522.148. `./bin/dev build` and `./bin/dev test` passed on that RC SDK. `ganda kanban reconcile` landed the kitchen. `ganda repo audit` then passed: Passed 37, Failed 0, Skipped 3.
 - Review oracle round 2: reviewer-claude (Claude Opus 5.5, claude-opus-5-5) ran at effort 1 with a general-only roster, turn cap 80, on 2026-11-07. It re-verified M1 as fixed and found no new issues. Disposition is clean. Artifacts: `review/round-2/general.md`, `review/round-2/merged.md`, `review/disposition.md`.
+- Installed ganda changed during this walk: was 50128416 bytes 0ae910dc29e1318d800d9595d8d3462a946a1af23b0e841a6f5d3c20b91354a8; now 50128416 bytes 6ee9d7151768bb3ee32bb86afcd1f647f65d076cab7eb76aa698982f2e8657b2
 
 ## Results
 
