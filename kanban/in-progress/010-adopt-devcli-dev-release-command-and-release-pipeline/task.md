@@ -79,6 +79,8 @@ has no GitHub Packages feed. The workflow still installs the .NET 10 SDK and the
 
 `ganda repo audit` first reported one warning, `vscode-window-icon`, because `.vscode/settings.json` was missing. `ganda repo audit --fix --checks vscode-window-icon` wrote that file. It is gitignored (`.gitignore` line `.vscode/*`). The re-audit reported Passed 38, Failed 0, Skipped 3.
 
+On the clean task branch, `./bin/dev release --dry-run` passed the gh and clean-tree guards and stopped with "release must be cut from master". `git tag -l 'v1.1.0'` was empty. `./bin/dev workflow --mode pr` then ran self-install, clean, build, test, and pack and printed `Pipeline SUCCEEDED`. The packed file is `artifacts/packages/TimeWarp.Builder.1.1.0.nupkg`.
+
 ### How to validate
 
 **Smoke:** from this worktree, on a clean tree:
