@@ -75,19 +75,39 @@ artifact from the version-bump run will be gone by then. `dev release` can
 still pass and create the tag. The promotion run then fails at
 download-artifact.
 
-Before `dev release`, read the run id from the guard 8 line of
-`dev release --dry-run` and confirm that run still has a live artifact:
+The run id on the guard 8 line is not the artifact to trust. That line prints
+the first candidate from `OrderCandidateRuns`, and that order puts a `push`
+run ahead of every other event at the commit. After a refresh the line still
+names the old push run. Its artifact stays expired, and the run stays older
+than 7 days. Release mode does not stop on that run. It lists every
+successful `workflow.yml` run at the target commit, drops `pull_request`
+runs, and downloads the first candidate whose `Packages-*` artifact is not
+expired.
+
+Before `dev release`, copy the full SHA from the dry-run line
+`Target commit:` and list the successful runs at that commit:
 
 ```bash
-gh api "repos/TimeWarpEngineering/timewarp-builder/actions/runs/RUN_ID/artifacts" --jq '.artifacts[] | select(.name | startswith("Packages-")) | {name, expired, created_at}'
+gh run list --workflow workflow.yml --commit SHA --status success --json databaseId,event
 ```
 
-Refresh when that list is empty, `expired` is true, or the run is more than
-7 days old. Wait until the new run is green, then dry-run again:
+Skip each run whose `event` is `pull_request`. For every other run:
+
+```bash
+gh api "repos/TimeWarpEngineering/timewarp-builder/actions/runs/RUN_ID/artifacts" --jq '.artifacts[] | select(.name | startswith("Packages-")) | {name, expired}'
+```
+
+Go on when any of those runs has a `Packages-*` row with `expired` false.
+Refresh when every list is empty or every `Packages-*` row is expired:
 
 ```bash
 gh workflow run workflow.yml --ref master -f mode=merge
 ```
+
+Wait until that run is green, dry-run again, and repeat the list at the same
+SHA. The push run that guard 8 names stays older than 7 days. That age is
+not a reason to dispatch again once another run at the SHA has a live
+artifact.
 
 Use the same command when guard 8 refuses. The refusal starts with "no
 successful CI run of workflow.yml" and, when HEAD is not kanban-only, names
@@ -96,10 +116,10 @@ usual case: the push filter skips `documentation/**`, and there is no run to
 rerun. `workflow_dispatch` with `mode=merge` on `master` ignores the push
 paths filter. It builds, packs, and uploads `Packages-*` because `github.ref`
 is `refs/heads/master`. A pull-request run is not a candidate. Wait for
-green, then `dev release --dry-run`.
+green, then `dev release --dry-run`, and apply the artifact check above.
 
-With the guards passed, and with a live `Packages-*` artifact on the run guard
-8 named:
+With the guards passed, and with a live `Packages-*` artifact on any
+successful run at the target commit whose event is not `pull_request`:
 
 ```bash
 dev release
@@ -121,13 +141,15 @@ pipeline.
    an ancestor of `origin/master`. The checkout is `fetch-depth: 0`.
 2. **Check version.** `None` and `Partial` continue. `All` stops.
 3. **Locate CI run.** `gh run list` for `workflow.yml` at the commit, status
-   success. Pull-request runs are ignored. A push run is preferred.
+   success. Pull-request runs are ignored. A push run is ordered first.
 4. **Download artifact.** The first candidate with a live `Packages-*` artifact
-   is downloaded into `artifacts/packages/`. An expired artifact is skipped.
-   When every candidate is expired, or none uploaded `Packages-*`, the run
-   stops. `gh run rerun <run-id>` rebuilds that same commit. GitHub accepts
-   the rerun for 30 days after the run. Past that, use the break-glass
-   recovery below. Leave the package unbuilt at release time.
+   is downloaded into `artifacts/packages/`. An expired artifact is skipped,
+   including the preferred push run, so a later merge-mode dispatch at the
+   same commit supplies the bytes. When every candidate is expired, or none
+   uploaded `Packages-*`, the run stops. `gh run rerun <run-id>` rebuilds
+   that same commit. GitHub accepts the rerun for 30 days after the run.
+   Past that, use the break-glass recovery below. Leave the package unbuilt
+   at release time.
 5. **Verify.** The downloaded file must be `TimeWarp.Builder.{Version}.nupkg`
    and nothing else.
 6. **Push.** `dotnet nuget push` to `https://api.nuget.org/v3/index.json` with
