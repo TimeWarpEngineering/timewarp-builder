@@ -115,6 +115,7 @@ lists at that line.
 - Fix pass (review round 3): 01a1bce7-5da2-7911-b0f7-a84621d14579 (2026-11-09). M4 recorded fixed on `review/round-3/merged.md`. Round 4 is the host's next node.
 - Review oracle round 4: claude (claude-opus-5-5), effort 1, roster general, turn cap 80, 2026-11-09. Scope `083d7c4..c8f6bf6`. M4 verified fixed. New M5 (bug, open). Result: Blocked, fix pass needed for open finding M5.
 - Fix pass (review round 4): 01a1bcf1-ac1b-7451-a154-3fcccbc48418 (2026-11-09). M5 recorded fixed on `review/round-4/merged.md`. Round 5 is the host's next node.
+- Review oracle round 5: claude (claude-opus-5-5), effort 1, roster general, turn cap 80, 2026-11-09. Scope `c8f6bf6..b4d096e`. M5 verified fixed. No new findings. Disposition `clean` written to `review/disposition.md`. Result: Done.
 
 ## Results
 
@@ -192,12 +193,19 @@ Round 4 (2026-11-09): effort 1, one `general` reviewer, scope `083d7c4..c8f6bf6`
 
 Paths: `review/round-4/general.md`, `review/round-4/merged.md`.
 
+Round 5 (2026-11-09): effort 1, one `general` reviewer, scope `c8f6bf6..b4d096e` (guide only). M5 verified fixed against `SelectReleaseTarget`, `LocateReleaseTargetAsync`, and the dry-run `Target commit:` line. No new findings.
+
+**Review disposition: clean.** Rounds 5, effort 1–3, roster `general`. Final counts: bug 0 open / 5 fixed / 0 wontfix, suggestion 0 open / 1 fixed / 0 wontfix, nit 0. No exceptions and no escalations. The goal restatement matches the original task; no misread.
+
+Paths: `review/review-framework.md`, `review/round-5/general.md`, `review/round-5/merged.md`, `review/disposition.md`.
+
 ## Review
 
 - Round 1: M1 and M2 fixed in `releasing.md`.
 - Round 2: M3 fixed in `releasing.md`.
 - Round 3: M4 fixed in `releasing.md`.
-- Round 4: M5 fixed in `releasing.md`. Round 5 has not run.
+- Round 4: M5 fixed in `releasing.md`.
+- Round 5: Done
 ## Notes
 
 The `bin/dev` AOT on-create failure: `MSB3030: Could not copy the file ".../dev.xml" because it
