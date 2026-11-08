@@ -19,8 +19,11 @@ pipeline promotes the package CI already built. It does not compile again.
   `artifacts/packages/TimeWarp.Builder.{Version}.nupkg`. A green push to
   `master` uploads that file as `Packages-{run_number}` (`retention-days: 7`)
   and then keeps the two newest `Packages-*` artifacts. Pull requests do not
-  upload. A push that changes only kanban or documentation does not run CI.
-  `dev release` walks back over those commits to the newest green run.
+  upload. A push that changes only `kanban/` does not run CI. `dev release`
+  walks back over those kanban-only commits, at most 50, to the newest green
+  run and tags that commit. A commit that changes any path outside `kanban/`,
+  including `documentation/`, ends the walk. The push filter also skips
+  `documentation/**`, so a docs-only HEAD has no run. Step 2 is the recovery.
 - **Release:** promote that artifact. The pipeline is
   `tag-gate → check-version → locate-run → download-artifact → verify → push`.
   Push uses the short-lived key from `nuget/login@v1` and `--skip-duplicate`.
@@ -38,11 +41,12 @@ The props version is 1.1.0. Cutting that release is a separate step, after
 
 ### 2. Cut the release with `dev release`
 
-From a clean `master` worktree that matches `origin/master`:
+From a clean `master` worktree that matches `origin/master`, start with the
+read-only pass. The cut itself is the `dev release` below, after the artifact
+check.
 
 ```bash
 dev release --dry-run
-dev release
 ```
 
 `dev release` reads `<Version>` and runs these guards before it creates anything.
@@ -60,12 +64,50 @@ the tag and `gh release create` commands without running them.
    published passes. All published means bump. Partial means an earlier push
    did not finish: resume from the original commit, or bump.
 8. **A successful `workflow.yml` run** exists at `HEAD`, or at the nearest
-   earlier commit whose changes are kanban-only. The tag is placed on the
-   commit that produced the `Packages-*` artifact.
+   earlier commit whose changes are kanban-only. The walk stops at the first
+   commit with a path outside `kanban/`. The tag is placed on the commit that
+   produced the `Packages-*` artifact.
 
-With the guards passed, `dev release` creates the annotated tag `v{Version}`,
-pushes it, and runs `gh release create`. Publishing that GitHub Release starts
-the promotion pipeline.
+Guard 8 does not check that the artifact is still downloadable. `Packages-*`
+is kept for 7 days, and each green master push deletes older `Packages-*`
+artifacts until two remain. The 1.1.0 cut waits for .NET 11 GA, so the
+artifact from the version-bump run will be gone by then. `dev release` can
+still pass and create the tag. The promotion run then fails at
+download-artifact.
+
+Before `dev release`, read the run id from the guard 8 line of
+`dev release --dry-run` and confirm that run still has a live artifact:
+
+```bash
+gh api "repos/TimeWarpEngineering/timewarp-builder/actions/runs/RUN_ID/artifacts" --jq '.artifacts[] | select(.name | startswith("Packages-")) | {name, expired, created_at}'
+```
+
+Refresh when that list is empty, `expired` is true, or the run is more than
+7 days old. Wait until the new run is green, then dry-run again:
+
+```bash
+gh workflow run workflow.yml --ref master -f mode=merge
+```
+
+Use the same command when guard 8 refuses. The refusal starts with "no
+successful CI run of workflow.yml" and, when HEAD is not kanban-only, names
+the commit and the path outside `kanban/`. A documentation-only merge is the
+usual case: the push filter skips `documentation/**`, and there is no run to
+rerun. `workflow_dispatch` with `mode=merge` on `master` ignores the push
+paths filter. It builds, packs, and uploads `Packages-*` because `github.ref`
+is `refs/heads/master`. A pull-request run is not a candidate. Wait for
+green, then `dev release --dry-run`.
+
+With the guards passed, and with a live `Packages-*` artifact on the run guard
+8 named:
+
+```bash
+dev release
+```
+
+`dev release` creates the annotated tag `v{Version}`, pushes it, and runs
+`gh release create`. Publishing that GitHub Release starts the promotion
+pipeline.
 
 `bin/dev` is an AOT snapshot. If `release` is missing from `dev --help`, run
 `dev self-install`, or use `dotnet run --file tools/dev-cli/dev.cs -- release`.
@@ -82,7 +124,10 @@ the promotion pipeline.
    success. Pull-request runs are ignored. A push run is preferred.
 4. **Download artifact.** The first candidate with a live `Packages-*` artifact
    is downloaded into `artifacts/packages/`. An expired artifact is skipped.
-   `gh run rerun <run-id>` rebuilds the same commit when every artifact is gone.
+   When every candidate is expired, or none uploaded `Packages-*`, the run
+   stops. `gh run rerun <run-id>` rebuilds that same commit. GitHub accepts
+   the rerun for 30 days after the run. Past that, use the break-glass
+   recovery below. Leave the package unbuilt at release time.
 5. **Verify.** The downloaded file must be `TimeWarp.Builder.{Version}.nupkg`
    and nothing else.
 6. **Push.** `dotnet nuget push` to `https://api.nuget.org/v3/index.json` with
@@ -113,8 +158,31 @@ changed, bump the version instead.
 gh workflow run workflow.yml --repo TimeWarpEngineering/timewarp-builder -f mode=release -f confirm=release --ref v1.1.0
 ```
 
-Replace the ref with the tag that already exists. Do not dispatch this against
-a commit that was never tagged for that version.
+Replace the ref with the tag that already exists. Dispatch this against the
+commit that was tagged for that version.
+
+When the promotion run stopped because `Packages-*` was expired or missing,
+and the CI run is still inside the 30-day window, `gh run rerun <run-id>` on
+that CI run rebuilds the same commit. After the new artifact exists, re-run
+the failed promotion run, or dispatch break-glass again.
+
+Past 30 days GitHub refuses the rerun. Refresh the artifact when `master`
+still points at the tagged commit:
+
+```bash
+gh workflow run workflow.yml --ref master -f mode=merge
+```
+
+Wait for green, then dispatch break-glass with `--ref` set to the existing
+tag. The merge-mode dispatch uses `--ref master`. The upload step runs only
+for `refs/heads/master`, so a dispatch whose ref is the tag does not upload.
+Locate-run on the break-glass checkout reads runs at the tag's commit, so
+the green merge-mode run has to be that same commit.
+
+When `master` has moved past the tag, that dispatch builds a different
+commit and leaves the tag's artifact missing. After 30 days there is no
+same-commit rebuild. Bump `<Version>` and cut a new release from a fresh
+green master run. Leave the old tag in place.
 
 ## Trusted publishing
 
