@@ -123,14 +123,16 @@ older than 7 days. That age is not a reason to dispatch again once another
 run at the new `Target commit:` SHA has a live artifact.
 
 Use the same command when guard 8 refuses. The refusal starts with "no
-successful CI run of workflow.yml" and, when HEAD is not kanban-only, names
-the commit and the path outside `kanban/`. A documentation-only merge is the
-usual case: the push filter skips `documentation/**`, and there is no run to
-rerun. `workflow_dispatch` with `mode=merge` on `master` ignores the push
-paths filter. It builds, packs, and uploads `Packages-*` because `github.ref`
-is `refs/heads/master`. A pull-request run is not a candidate. The refused
-commit is `HEAD`, so after the run is green the new `Target commit:` is that
-same SHA. Dry-run again and apply the artifact check above.
+successful CI run of workflow.yml". When the walk reaches a commit with a
+path outside `kanban/`, it also names that commit and the path. That commit
+is `HEAD`, or the commit under a run of kanban-only commits. The usual case
+is a documentation-only merge followed by `land kanban` commits. The push
+filter skips `documentation/**`, so there is no run to rerun. The refusal
+names the merge. `workflow_dispatch` with `mode=merge` on `master`
+ignores the push paths filter. It builds, packs, and uploads `Packages-*`
+because `github.ref` is `refs/heads/master`. A pull-request run is not a
+candidate. The dispatch builds `HEAD`, so after the run is green the new
+`Target commit:` is `HEAD`. Dry-run again and apply the artifact check above.
 
 With the guards passed, and with a live `Packages-*` artifact on any
 successful run at the latest dry-run `Target commit:` whose event is not

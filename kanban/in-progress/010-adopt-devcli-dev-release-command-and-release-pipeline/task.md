@@ -78,6 +78,14 @@ being released. `gh run rerun` lasts 30 days. Past that, while `master` is
 still the tagged commit, recovery is the merge-mode dispatch on `master`,
 then break-glass with `--ref` set to the existing tag.
 
+A guard 8 refusal starts with "no successful CI run of workflow.yml" and the
+`HEAD` SHA. When the walk reaches a commit with a path outside `kanban/`, it
+names that commit and the path. That commit is `HEAD`, or the commit under a
+run of kanban-only commits, which on this repo is the documentation merge
+under later `land kanban` commits. The same merge-mode dispatch builds
+`HEAD`. After it is green, the new `Target commit:` is `HEAD`. The operator
+lists at that line.
+
 ## Checklist
 
 - [x] Study timewarp-ramani's dev CLI, `workflow.yml`, and releasing guide
@@ -88,6 +96,7 @@ then break-glass with `--ref` set to the existing tag.
 - [x] Correct the guide: kanban-only walk-back, docs-only HEAD recovery, and expired-artifact recovery (review M1, M2)
 - [x] Correct the pre-cut check: any live `Packages-*` on a non-pull-request run at the target commit, not the run guard 8 names (review M3)
 - [x] After a merge-mode refresh, list artifacts at the new dry-run `Target commit:`. That SHA moves to HEAD when HEAD was kanban-only past the old target (review M4)
+- [x] Guard 8 refusal names the first commit with a path outside `kanban/`. That commit is HEAD, or the commit under `land kanban` commits. The dispatch builds HEAD, so the new `Target commit:` is HEAD (review M5)
 - [x] `bin/dev` (`dev self-install`) builds. It failed during the worktree on-create on 2026-11-08 with MSB3030, missing `dev.xml`
 - [x] Build and tests green, `ganda repo audit` clean
 - [x] Do not create a tag or GitHub Release
@@ -104,6 +113,8 @@ then break-glass with `--ref` set to the existing tag.
 - Fix pass (review round 2): 01a1bcdd-6707-7582-88dc-bb8d2756541f (2026-11-09). M3 recorded fixed on `review/round-2/merged.md`. Round 3 is the host's next node.
 - Review oracle round 3: claude (claude-opus-5-5), effort 1, roster general, turn cap 80, 2026-11-09. Scope `0070dea..083d7c4`. M3 verified fixed. New M4 (bug, open). Result: Blocked, fix pass needed for open finding M4.
 - Fix pass (review round 3): 01a1bce7-5da2-7911-b0f7-a84621d14579 (2026-11-09). M4 recorded fixed on `review/round-3/merged.md`. Round 4 is the host's next node.
+- Review oracle round 4: claude (claude-opus-5-5), effort 1, roster general, turn cap 80, 2026-11-09. Scope `083d7c4..c8f6bf6`. M4 verified fixed. New M5 (bug, open). Result: Blocked, fix pass needed for open finding M5.
+- Fix pass (review round 4): 01a1bcf1-ac1b-7451-a154-3fcccbc48418 (2026-11-09). M5 recorded fixed on `review/round-4/merged.md`. Round 5 is the host's next node.
 
 ## Results
 
@@ -125,6 +136,10 @@ Review round 3's bug was the refresh loop that the M3 wording added. The merge-m
 
 This fix pass reran `ganda repo audit` (Passed 38, Failed 0, Skipped 3), `./bin/dev build` (0 warnings, both target DLLs, package `TimeWarp.Builder.1.1.0.nupkg`), `./bin/dev test` (6 of 6 Jaribu files), and `./bin/dev check-version` (source 1.1.0, NuGet 1.0.0). `./bin/dev release --dry-run` stopped at the clean-tree guard while these edits were uncommitted. After that commit, the same command passed the clean-tree guard and stopped with "release must be cut from master". It did not run `gh release create`. `git tag -l 'v1.1.0'` was empty. `source/Directory.Build.props` was unchanged.
 
+Review round 4's bug was the guard 8 refusal paragraph. The walk names the first commit with a path outside `kanban/`. That commit is `HEAD`, or the commit under a run of kanban-only commits. On this repo the usual documentation-only merge is followed by `land kanban` commits, so the refusal names the merge. The clause "when HEAD is not kanban-only" is gone. The merge-mode dispatch builds `HEAD`, so after it is green the new `Target commit:` is `HEAD`. The operator dry-runs again and applies the artifact check at that line. Round 4 `merged.md` marks M5 fixed. Disposition waits for review round 5. No tag and no GitHub Release were created. `<Version>` is still 1.1.0.
+
+This fix pass reran `ganda repo audit` (Passed 38, Failed 0, Skipped 3), `./bin/dev build` (0 warnings, both target DLLs, package `TimeWarp.Builder.1.1.0.nupkg`), `./bin/dev test` (6 of 6 Jaribu files), and `./bin/dev check-version` (source 1.1.0, NuGet 1.0.0). `./bin/dev release --dry-run` stopped at the clean-tree guard while these edits were uncommitted. It did not run `gh release create`. `git tag -l 'v1.1.0'` was empty. `source/Directory.Build.props` was unchanged.
+
 ### How to validate
 
 **Smoke:** from this worktree, on a clean tree:
@@ -140,7 +155,7 @@ git diff -- source/Directory.Build.props
 grep -n -E 'kanban-only|mode=merge|30 days|Target commit:|pull_request|OrderCandidateRuns' documentation/developer/guides/releasing.md
 ```
 
-**Expect:** `release` is in `./bin/dev --help`. `./bin/dev release --dry-run` exits non-zero because this branch is not `master`, prints no `gh release create` execution, and `git tag -l 'v1.1.0'` stays empty. `./bin/dev check-version` prints `Packages checked: TimeWarp.Builder`, `Version in source: 1.1.0`, and `Latest NuGet version: 1.0.0`. `./bin/dev build` is 0 warnings and writes `source/timewarp-builder/bin/Release/net10.0/TimeWarp.Builder.dll` and `source/timewarp-builder/bin/Release/net11.0/TimeWarp.Builder.dll`. All 6 Jaribu runfiles pass. `source/Directory.Build.props` still has `<Version>1.1.0</Version>`. The guide's walk-back sentence names kanban-only commits and says a path outside `kanban/`, including `documentation/`, ends the walk. It contains `gh workflow run workflow.yml --ref master -f mode=merge` as the guard 8 recovery and as the pre-cut refresh. The pre-cut check copies the full SHA from `Target commit:`, runs `gh run list --workflow workflow.yml --commit SHA --status success`, skips `pull_request`, and continues when any other run has a `Packages-*` artifact with `expired` false. After the refresh is green it says to dry-run again and list at the new `Target commit:` SHA, and not to repeat the list at the SHA from before the refresh. It says that SHA moves to `HEAD` when `HEAD` was kanban-only commits past the old target, and that the old SHA still showing every artifact expired is not a reason to dispatch again. It limits "the push run that guard 8 names stays older than 7 days" to the case where `HEAD` was already the target. Download says a later merge-mode dispatch on `master` supplies the bytes when that dispatch ran at the commit being released. It says GitHub accepts `gh run rerun` for 30 days, and the break-glass section then dispatches merge mode on `master` while `master` is still the tagged commit.
+**Expect:** `release` is in `./bin/dev --help`. `./bin/dev release --dry-run` exits non-zero because this branch is not `master`, prints no `gh release create` execution, and `git tag -l 'v1.1.0'` stays empty. `./bin/dev check-version` prints `Packages checked: TimeWarp.Builder`, `Version in source: 1.1.0`, and `Latest NuGet version: 1.0.0`. `./bin/dev build` is 0 warnings and writes `source/timewarp-builder/bin/Release/net10.0/TimeWarp.Builder.dll` and `source/timewarp-builder/bin/Release/net11.0/TimeWarp.Builder.dll`. All 6 Jaribu runfiles pass. `source/Directory.Build.props` still has `<Version>1.1.0</Version>`. The guide's walk-back sentence names kanban-only commits and says a path outside `kanban/`, including `documentation/`, ends the walk. It contains `gh workflow run workflow.yml --ref master -f mode=merge` as the guard 8 recovery and as the pre-cut refresh. The pre-cut check copies the full SHA from `Target commit:`, runs `gh run list --workflow workflow.yml --commit SHA --status success`, skips `pull_request`, and continues when any other run has a `Packages-*` artifact with `expired` false. After the refresh is green it says to dry-run again and list at the new `Target commit:` SHA, and not to repeat the list at the SHA from before the refresh. It says that SHA moves to `HEAD` when `HEAD` was kanban-only commits past the old target, and that the old SHA still showing every artifact expired is not a reason to dispatch again. It limits "the push run that guard 8 names stays older than 7 days" to the case where `HEAD` was already the target. Download says a later merge-mode dispatch on `master` supplies the bytes when that dispatch ran at the commit being released. It says GitHub accepts `gh run rerun` for 30 days, and the break-glass section then dispatches merge mode on `master` while `master` is still the tagged commit. The guard 8 refusal starts with "no successful CI run of workflow.yml". When the walk reaches a commit with a path outside `kanban/`, it names that commit and the path. That commit is `HEAD`, or the commit under a run of kanban-only commits. The usual case is a documentation-only merge followed by `land kanban` commits, and the refusal names the merge. The dispatch builds `HEAD`, so after the run is green the new `Target commit:` is `HEAD`. The paragraph does not say the refused commit is `HEAD`, and it does not say "when HEAD is not kanban-only".
 
 **Automated gate:** `./bin/dev build` and `./bin/dev test` from the repo root. `ganda repo audit` exits 0.
 
@@ -170,11 +185,19 @@ Round 3 (2026-11-09): effort 1, one `general` reviewer, scope `0070dea..083d7c4`
 
 Paths: `review/round-3/general.md`, `review/round-3/merged.md`.
 
+Round 4 (2026-11-09): effort 1, one `general` reviewer, scope `083d7c4..c8f6bf6` (guide only). After this fix pass the live ledger is bug 0 open / 5 fixed, suggestion 0 open / 1 fixed, nit 0. Disposition is written on `review/round-4/merged.md`. Review round 5 re-checks the guide.
+
+- M4 (bug, fixed): verified against `LocateReleaseTargetAsync` and `OrderCandidateRuns`.
+- M5 (bug, fixed): the guard 8 refusal names the first commit with a path outside `kanban/`. That commit is `HEAD`, or the commit under a run of kanban-only commits. The usual documentation-only merge followed by `land kanban` commits names the merge. The dispatch builds `HEAD`, so the new `Target commit:` is `HEAD`. The "when HEAD is not kanban-only" clause is gone.
+
+Paths: `review/round-4/general.md`, `review/round-4/merged.md`.
+
 ## Review
 
 - Round 1: M1 and M2 fixed in `releasing.md`.
 - Round 2: M3 fixed in `releasing.md`.
-- Round 3: M4 fixed in `releasing.md`. Round 4 has not run.
+- Round 3: M4 fixed in `releasing.md`.
+- Round 4: M5 fixed in `releasing.md`. Round 5 has not run.
 ## Notes
 
 The `bin/dev` AOT on-create failure: `MSB3030: Could not copy the file ".../dev.xml" because it
