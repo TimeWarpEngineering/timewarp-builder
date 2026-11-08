@@ -61,7 +61,7 @@ internal sealed class PackCommand : ICommand<Unit>
       {
         Environment.ExitCode = exitCode;
         Terminal.WriteErrorLine("Pack failed!");
-        return Value;
+        return Unit.Value;
       }
 
       // List produced packages
@@ -73,7 +73,7 @@ internal sealed class PackCommand : ICommand<Unit>
         Terminal.WriteLine($"  {Path.GetFileName(package)}");
       }
 
-      return Value;
+      return Unit.Value;
     }
   }
 }

@@ -34,7 +34,7 @@ internal sealed class VerifySamplesCommand : ICommand<Unit>
       if (!Directory.Exists(samplesDirectory))
       {
         Terminal.WriteLine("No samples directory found. Skipping sample verification.");
-        return Value;
+        return Unit.Value;
       }
 
       string[] sampleFiles = Directory.GetFiles(samplesDirectory, "*.cs", SearchOption.AllDirectories);
@@ -42,7 +42,7 @@ internal sealed class VerifySamplesCommand : ICommand<Unit>
       if (sampleFiles.Length == 0)
       {
         Terminal.WriteLine("No sample files found. Skipping sample verification.");
-        return Value;
+        return Unit.Value;
       }
 
       Terminal.WriteLine($"Verifying {sampleFiles.Length} sample file(s)...");
@@ -75,11 +75,11 @@ internal sealed class VerifySamplesCommand : ICommand<Unit>
       {
         Environment.ExitCode = 1;
         Terminal.WriteErrorLine($"\n❌ {failedCount} sample(s) failed to compile");
-        return Value;
+        return Unit.Value;
       }
 
       Terminal.WriteLine($"\n✅ All {sampleFiles.Length} sample(s) verified successfully!");
-      return Value;
+      return Unit.Value;
     }
   }
 }
