@@ -10,18 +10,18 @@
     <PackageVersion Include="TimeWarp.Amuru.Tools" Version="2.0.0" />
     <PackageVersion Include="TimeWarp.Nuru" Version="4.0.0-beta.11" />
     <PackageVersion Include="TimeWarp.Build.Tasks" Version="1.0.0" />
-    <PackageVersion Include="TimeWarp.Jaribu" Version="1.0.0-beta.13" />
+    <PackageVersion Include="TimeWarp.Jaribu" Version="1.0.0-beta.15" />
     <PackageVersion Include="TimeWarp.SourceGenerators" Version="1.0.0-beta.11" />
   </ItemGroup>
   <ItemGroup Label="Testing">
     <PackageVersion Include="Shouldly" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Label="Code Analyzers">
-    <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0" />
-    <PackageVersion Include="Roslynator.CodeAnalysis.Analyzers" Version="4.15.0" />
-    <PackageVersion Include="Roslynator.Formatting.Analyzers" Version="4.15.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.301" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="5.3.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="4.14.0" />
+    <PackageVersion Include="Roslynator.Analyzers" Version="5.0.1" />
+    <PackageVersion Include="Roslynator.CodeAnalysis.Analyzers" Version="5.0.1" />
+    <PackageVersion Include="Roslynator.Formatting.Analyzers" Version="5.0.1" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.403" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="5.9.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.6.0" />
   </ItemGroup>
 </Project>
