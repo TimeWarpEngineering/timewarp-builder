@@ -77,12 +77,15 @@ download-artifact.
 
 The run id on the guard 8 line is not the artifact to trust. That line prints
 the first candidate from `OrderCandidateRuns`, and that order puts a `push`
-run ahead of every other event at the commit. After a refresh the line still
-names the old push run. Its artifact stays expired, and the run stays older
-than 7 days. Release mode does not stop on that run. It lists every
-successful `workflow.yml` run at the target commit, drops `pull_request`
-runs, and downloads the first candidate whose `Packages-*` artifact is not
-expired.
+run ahead of every other event at the commit. Release mode does not stop on
+that run. It lists every successful `workflow.yml` run at the target commit,
+drops `pull_request` runs, and downloads the first candidate whose
+`Packages-*` artifact is not expired. When `HEAD` is already the target, a
+refresh leaves this line on the old push run. Its artifact stays expired,
+and the run stays older than 7 days. When the dry-run printed
+`HEAD is N kanban-only commit(s) past` that target, the refresh builds
+`HEAD`. The next dry-run names that `HEAD` on `Target commit:`, and the run
+id on the guard 8 line is the new dispatch, not the old push run.
 
 Before `dev release`, copy the full SHA from the dry-run line
 `Target commit:` and list the successful runs at that commit:
@@ -104,10 +107,20 @@ Refresh when every list is empty or every `Packages-*` row is expired:
 gh workflow run workflow.yml --ref master -f mode=merge
 ```
 
-Wait until that run is green, dry-run again, and repeat the list at the same
-SHA. The push run that guard 8 names stays older than 7 days. That age is
-not a reason to dispatch again once another run at the SHA has a live
-artifact.
+That dispatch builds the `master` tip, which is `HEAD`, not the SHA just
+listed. Wait until the run is green. Dry-run again and copy the full SHA
+from the new `Target commit:` line. List at that SHA. Do not repeat the
+list at the SHA from before the refresh.
+
+The new SHA is unchanged when `HEAD` was already the target. It moves to
+`HEAD` when `HEAD` was kanban-only commits past the old target. The
+dispatch's green run is at `HEAD`, so the walk stops there and the tag is
+that commit. The old SHA still shows every artifact expired. That is
+expected, and it is not a reason to dispatch again.
+
+When `HEAD` was already the target, the push run that guard 8 names stays
+older than 7 days. That age is not a reason to dispatch again once another
+run at the new `Target commit:` SHA has a live artifact.
 
 Use the same command when guard 8 refuses. The refusal starts with "no
 successful CI run of workflow.yml" and, when HEAD is not kanban-only, names
@@ -115,11 +128,13 @@ the commit and the path outside `kanban/`. A documentation-only merge is the
 usual case: the push filter skips `documentation/**`, and there is no run to
 rerun. `workflow_dispatch` with `mode=merge` on `master` ignores the push
 paths filter. It builds, packs, and uploads `Packages-*` because `github.ref`
-is `refs/heads/master`. A pull-request run is not a candidate. Wait for
-green, then `dev release --dry-run`, and apply the artifact check above.
+is `refs/heads/master`. A pull-request run is not a candidate. The refused
+commit is `HEAD`, so after the run is green the new `Target commit:` is that
+same SHA. Dry-run again and apply the artifact check above.
 
 With the guards passed, and with a live `Packages-*` artifact on any
-successful run at the target commit whose event is not `pull_request`:
+successful run at the latest dry-run `Target commit:` whose event is not
+`pull_request`:
 
 ```bash
 dev release
@@ -144,12 +159,15 @@ pipeline.
    success. Pull-request runs are ignored. A push run is ordered first.
 4. **Download artifact.** The first candidate with a live `Packages-*` artifact
    is downloaded into `artifacts/packages/`. An expired artifact is skipped,
-   including the preferred push run, so a later merge-mode dispatch at the
-   same commit supplies the bytes. When every candidate is expired, or none
-   uploaded `Packages-*`, the run stops. `gh run rerun <run-id>` rebuilds
-   that same commit. GitHub accepts the rerun for 30 days after the run.
-   Past that, use the break-glass recovery below. Leave the package unbuilt
-   at release time.
+   including the preferred push run. A later merge-mode dispatch on `master`
+   supplies the bytes when that dispatch ran at the commit being released.
+   That holds when `HEAD` was already the target. When `HEAD` was kanban-only
+   commits past the old target, the dispatch ran at `HEAD`, the next dry-run
+   moves `Target commit:` there, and the tag is that `HEAD`. When every
+   candidate is expired, or none uploaded `Packages-*`, the run stops.
+   `gh run rerun <run-id>` rebuilds that same commit. GitHub accepts the
+   rerun for 30 days after the run. Past that, use the break-glass recovery
+   below. Leave the package unbuilt at release time.
 5. **Verify.** The downloaded file must be `TimeWarp.Builder.{Version}.nupkg`
    and nothing else.
 6. **Push.** `dotnet nuget push` to `https://api.nuget.org/v3/index.json` with
