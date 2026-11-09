@@ -6,19 +6,27 @@
     <TargetFramework>net11.0</TargetFramework>
     <TargetFrameworks></TargetFrameworks>
 
-    <!-- Suppress warnings that don't apply to CLI tools -->
+    <!-- Suppress warnings that don't apply to CLI tools.
+         DevCli content is compiled from the NuGet cache, where this repo's
+         .editorconfig does not apply, so the IDE* and IL* rules it trips are
+         suppressed here. CA1812 stays on: a dead internal class in this CLI
+         should still fail the build. The DevCli handlers the mediator
+         activates carry their own SuppressMessage. -->
     <!-- CA1031: Catch general exception types - OK for CLI error handling -->
+    <!-- CA1034: Nested types - used by the Nuru command pattern -->
     <!-- CA1303: Literal strings - OK for CLI output -->
     <!-- CA1508: Dead code analysis false positive -->
     <!-- CA1515: Internal types in exe projects are fine -->
-    <!-- CA1849: Sync WriteLine is fine for CLI output - ITerminal doesn't have async methods -->
+    <!-- CA1849: Sync WriteLine is fine for CLI output -->
     <!-- CA2007: ConfigureAwait not needed in top-level console apps -->
     <!-- CA2016: CancellationToken forwarding - will address where needed -->
     <!-- CA2000: Dispose on app builder - handled by framework -->
+    <!-- CA5399: HttpClient certificate revocation - DevCli NuGetVersionService -->
     <!-- RCS1046: Async suffix - private methods don't need it -->
-    <!-- IDE0211: Program.Main style - dev.cs is a runfile and must use top-level statements -->
+    <!-- RCS1194: ConfigureAwait - DevCli content compiled outside .editorconfig -->
+    <!-- IDE0211: dev.cs is a runfile and must use top-level statements -->
     <!-- CS1591: XML doc comments not required for CLI tool internals -->
-    <NoWarn>$(NoWarn);CA1031;CA1303;CA1508;CA1515;CA1849;CA2007;CA2016;CA2000;RCS1046;IDE0211;CS1591</NoWarn>
+    <NoWarn>$(NoWarn);CA1031;CA1034;CA1303;CA1508;CA1515;CA1849;CA2007;CA2016;CA2000;CA5399;RCS1046;RCS1194;IDE0005;IDE0022;IDE0046;IDE0052;IDE0055;IDE0058;IDE0065;IDE0066;IDE0078;IDE0160;IDE0211;IDE0290;IL2026;IL2104;IL3050;IL3053;CS1591</NoWarn>
 
     <!-- AOT Support -->
     <PublishAot>true</PublishAot>
@@ -26,35 +34,25 @@
 
     <!-- Enable interceptors for TimeWarp.Nuru source generator -->
     <InterceptorsNamespaces>$(InterceptorsNamespaces);TimeWarp.Nuru.Generated</InterceptorsNamespaces>
+
+    <!-- No XML doc file: on .NET 11 RC the dev runfile AOT publish (self-install /
+         claim onCreate) fails MSB3030 looking for dev.xml. Overrides the root
+         GenerateDocumentationFile setting. -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Global usings for dev-cli -->
-    <Using Include="System" />
-    <Using Include="System.IO" />
-    <Using Include="System.Linq" />
-    <Using Include="System.Threading" />
-    <Using Include="System.Threading.Tasks" />
-    <Using Include="System.Collections.Generic" />
-    <Using Include="System.Runtime.InteropServices" />
-
-    <Using Include="TimeWarp.Nuru" />
-    <Using Include="TimeWarp.Mediator" />
-    <Using Include="TimeWarp.Mediator.Unit" Static="true" />
-    <Using Include="TimeWarp.Amuru" />
-    <Using Include="TimeWarp.Terminal" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- Include endpoint files in compilation -->
+    <Compile Include="global-usings.cs" />
     <Compile Include="endpoints/**/*.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Package references -->
+    <!-- TimeWarp.Nuru.DevCli's .props compiles clean, check-version, release, and self-install. -->
     <PackageReference Include="TimeWarp.Nuru" />
+    <PackageReference Include="TimeWarp.Nuru.DevCli" />
     <PackageReference Include="TimeWarp.Amuru" />
     <PackageReference Include="TimeWarp.Amuru.Tools" />
+    <PackageReference Include="TimeWarp.Terminal" />
   </ItemGroup>
 
 </Project>

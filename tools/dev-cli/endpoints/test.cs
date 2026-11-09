@@ -50,7 +50,7 @@ internal sealed class TestCommand : ICommand<Unit>
       if (testFiles.Length == 0)
       {
         Terminal.WriteLine("No tests found. Skipping test step.");
-        return Value;
+        return Unit.Value;
       }
 
       Terminal.WriteLine($"Running {testFiles.Length} Jaribu test file(s)...");
@@ -85,11 +85,11 @@ internal sealed class TestCommand : ICommand<Unit>
       {
         Environment.ExitCode = 1;
         Terminal.WriteErrorLine($"\n❌ {failedCount} of {testFiles.Length} test file(s) failed");
-        return Value;
+        return Unit.Value;
       }
 
       Terminal.WriteLine($"\n✅ All {testFiles.Length} test file(s) passed!");
-      return Value;
+      return Unit.Value;
     }
   }
 }

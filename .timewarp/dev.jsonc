@@ -1,6 +1,7 @@
+// Per-repo dev-cli configuration (TimeWarp.Nuru.DevCli RepoConfigService).
+// feeds is absent, so check-version and dev release read nuget.org only.
+// The package set is every IsPackable project under source/.
 {
   "checkVersionConfig": {
-    "checkVersionStrategy": "nuget-search",
-    "packages": "TimeWarp.Builder"
   }
 }

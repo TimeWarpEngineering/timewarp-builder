@@ -3,38 +3,38 @@
 // DEV CLI - TIMEWARP.BUILDER DEVELOPMENT TOOL
 // ═══════════════════════════════════════════════════════════════════════════════
 //
-// This is the development CLI for TimeWarp.Builder that provides:
-// - Build, test, pack, and clean commands
-// - AOT-compiled binary for fast execution
-//
 // Usage:
-//   As runfile:  dotnet tools/dev-cli/dev.cs <command>
+//   As runfile:  dotnet run --file tools/dev-cli/dev.cs -- <command>
 //   As AOT:      ./bin/dev <command>
 //
-// Commands:
-//   dev build          - Build the TimeWarp.Builder library
-//   dev test           - Run tests
-//   dev clean          - Clean solution and artifacts
-//   dev pack           - Create NuGet packages
-//   dev format         - Check/fix code formatting
-//   dev check-version  - Verify version is ready to release
-//   dev verify-samples - Verify code samples compile
-//   dev workflow       - Run full CI/CD pipeline
-//   dev self-install   - AOT compile and install dev CLI to ./bin
+// Run `./bin/dev --help` for available commands.
 //
 // To bootstrap:
-//   dotnet run tools/dev-cli/dev.cs -- self-install
+//   dotnet run --file tools/dev-cli/dev.cs -- self-install
 //   direnv allow
 //   dev --help
 // ═══════════════════════════════════════════════════════════════════════════════
 
 #region Purpose
-// Runfile entry point for the dev CLI: builds the Nuru app and dispatches to the endpoint commands.
+// Entry point for the dev CLI.
+#endregion
+#region Design
+// Thin wrapper around TimeWarp.Nuru. Shared endpoints (clean, self-install,
+// check-version, release) come from TimeWarp.Nuru.DevCli and require the DI
+// registrations below (NURU050 names any that are missing). Repo commands:
+// build, test, pack, format, verify-samples, and workflow.
 #endregion
 
 NuruApp app = NuruApp.CreateBuilder()
   .WithName("dev")
   .WithDescription("Development CLI for timewarp-builder")
+  .ConfigureServices(services =>
+  {
+    services.AddSingleton<IRepoCleanService, RepoCleanService>();
+    services.AddSingleton<NuGetVersionService>();
+    services.AddSingleton<IRepoConfigService, RepoConfigService>();
+    services.AddSingleton<IPackableProjectService, PackableProjectService>();
+  })
   .DiscoverEndpoints()
   .Build();
 
