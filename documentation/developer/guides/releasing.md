@@ -9,7 +9,7 @@ pipeline promotes the package CI already built. It does not compile again.
 - **Version SSOT:** `<Version>` in `source/Directory.Build.props`. There is no
   MinVer and no per-project version. The release tag is `v{Version}`.
 - **One package.** `TimeWarp.Builder` is the only `IsPackable` project under
-  `source/`. It ships `net10.0` and `net11.0` in one nupkg. A project that must
+  `source/`. It ships `net11.0` only. A project that must
   not ship sets `IsPackable=false`. Do not add a `<Version>` to a csproj.
 - **Feed:** nuget.org only. `.timewarp/dev.jsonc` leaves `checkVersionConfig.feeds`
   unset, so `dev check-version` and `dev release` read nuget.org and do not
@@ -36,8 +36,8 @@ Open a pull request that changes `<Version>` in `source/Directory.Build.props`.
 After it merges, the `push` event runs `workflow.yml` in merge mode and uploads
 `Packages-*`. Nothing is published yet.
 
-The props version is 1.1.0. Cutting that release is a separate step, after
-.NET 11 is GA. This guide does not perform it.
+The props version is 2.0.0 (net11.0 only; dropping net10.0 is breaking). Cutting
+that release is a separate step. This guide does not perform it.
 
 ### 2. Cut the release with `dev release`
 
@@ -70,7 +70,7 @@ the tag and `gh release create` commands without running them.
 
 Guard 8 does not check that the artifact is still downloadable. `Packages-*`
 is kept for 7 days, and each green master push deletes older `Packages-*`
-artifacts until two remain. The 1.1.0 cut waits for .NET 11 GA, so the
+artifacts until two remain. If the cut waits days after the bump, the
 artifact from the version-bump run will be gone by then. `dev release` can
 still pass and create the tag. The promotion run then fails at
 download-artifact.
@@ -197,7 +197,7 @@ commit first. The tag-pin check rejects any other commit. If the source has
 changed, bump the version instead.
 
 ```bash
-gh workflow run workflow.yml --repo TimeWarpEngineering/timewarp-builder -f mode=release -f confirm=release --ref v1.1.0
+gh workflow run workflow.yml --repo TimeWarpEngineering/timewarp-builder -f mode=release -f confirm=release --ref v2.0.0
 ```
 
 Replace the ref with the tag that already exists. Dispatch this against the
