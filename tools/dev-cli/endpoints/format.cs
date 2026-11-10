@@ -21,7 +21,7 @@ internal sealed class FormatCommand : ICommand<Unit>
   [Option("verbose", "v", Description = "Verbose output")]
   public bool Verbose { get; set; }
 
-  internal sealed class Handler : ICommandHandler<FormatCommand, Unit>
+  internal sealed class Handler : IRequestHandler<FormatCommand, Unit>
   {
     private readonly ITerminal Terminal;
 
@@ -30,7 +30,7 @@ internal sealed class FormatCommand : ICommand<Unit>
       Terminal = terminal;
     }
 
-    public async Task<Unit> Handle(FormatCommand command, CancellationToken ct)
+    public async ValueTask<Unit> Handle(FormatCommand command, CancellationToken ct)
     {
       string? repoRoot = Git.FindRoot();
 
