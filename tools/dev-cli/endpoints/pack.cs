@@ -21,7 +21,7 @@ internal sealed class PackCommand : ICommand<Unit>
   [Option("verbose", "v", Description = "Verbose output")]
   public bool Verbose { get; set; }
 
-  internal sealed class Handler : ICommandHandler<PackCommand, Unit>
+  internal sealed class Handler : IRequestHandler<PackCommand, Unit>
   {
     private readonly ITerminal Terminal;
 
@@ -30,7 +30,7 @@ internal sealed class PackCommand : ICommand<Unit>
       Terminal = terminal;
     }
 
-    public async Task<Unit> Handle(PackCommand command, CancellationToken ct)
+    public async ValueTask<Unit> Handle(PackCommand command, CancellationToken ct)
     {
       string? repoRoot = Git.FindRoot() ??
         throw new InvalidOperationException("Could not find git repository root (.git not found)");

@@ -27,7 +27,7 @@ internal sealed partial class WorkflowCommand : ICommand<Unit>
   [Option("api-key", Description = "Short-lived nuget.org API key from nuget/login. Required in release mode.")]
   public string? ApiKey { get; set; }
 
-  internal sealed partial class Handler : ICommandHandler<WorkflowCommand, Unit>
+  internal sealed partial class Handler : IRequestHandler<WorkflowCommand, Unit>
   {
     private readonly ITerminal Terminal;
     private readonly NuGetVersionService NuGetVersionService;
@@ -52,7 +52,7 @@ internal sealed partial class WorkflowCommand : ICommand<Unit>
       PackableProjectService = packableProjectService;
     }
 
-    public async Task<Unit> Handle(WorkflowCommand command, CancellationToken cancellationToken)
+    public async ValueTask<Unit> Handle(WorkflowCommand command, CancellationToken cancellationToken)
     {
       ArgumentNullException.ThrowIfNull(command);
 
@@ -117,7 +117,7 @@ internal sealed partial class WorkflowCommand : ICommand<Unit>
         return;
       }
 
-      if (!await RunDevStepAsync("test", "Test"))
+      if (!await RunDevStepAsync("test", "Test", "--coverage"))
       {
         return;
       }
@@ -164,10 +164,10 @@ internal sealed partial class WorkflowCommand : ICommand<Unit>
       return true;
     }
 
-    private async Task<bool> RunDevStepAsync(string subcommand, string stepName)
+    private async Task<bool> RunDevStepAsync(string subcommand, string stepName, params string[] extraArguments)
     {
       int exitCode = await Shell.Builder(DevBin)
-        .WithArguments(subcommand)
+        .WithArguments([subcommand, .. extraArguments])
         .WithWorkingDirectory(RepoRoot)
         .WithNoValidation()
         .RunAsync(Ct);

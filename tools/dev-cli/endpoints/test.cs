@@ -10,6 +10,8 @@
 #region Design
 // Tests are standalone Jaribu runfiles (see the jaribu skill), not dotnet-test projects,
 // so each *.cs under tests/ is executed via 'dotnet run' and exit codes are aggregated.
+// --coverage wraps each runfile in the pinned dotnet-coverage tool (.config/dotnet-tools.json) and
+// writes one Cobertura file per runfile to artifacts/coverage; CI uploads that folder.
 // --filter maps to the JARIBU_FILTER_TAG environment variable Jaribu uses for tag filtering.
 #endregion
 
@@ -24,7 +26,10 @@ internal sealed class TestCommand : ICommand<Unit>
   [Option("filter", "f", Description = "Jaribu tag filter (sets JARIBU_FILTER_TAG)")]
   public string? Filter { get; set; }
 
-  internal sealed class Handler : ICommandHandler<TestCommand, Unit>
+  [Option("coverage", "c", Description = "Collect Cobertura code coverage into artifacts/coverage")]
+  public bool Coverage { get; set; }
+
+  internal sealed class Handler : IRequestHandler<TestCommand, Unit>
   {
     private readonly ITerminal Terminal;
 
@@ -33,7 +38,7 @@ internal sealed class TestCommand : ICommand<Unit>
       Terminal = terminal;
     }
 
-    public async Task<Unit> Handle(TestCommand command, CancellationToken ct)
+    public async ValueTask<Unit> Handle(TestCommand command, CancellationToken ct)
     {
       string? repoRoot = Git.FindRoot() ?? throw new InvalidOperationException("Could not find git repository root (.git not found)");
       if (!File.Exists(Path.Combine(repoRoot, "timewarp-builder.slnx")))
@@ -56,6 +61,25 @@ internal sealed class TestCommand : ICommand<Unit>
       Terminal.WriteLine($"Running {testFiles.Length} Jaribu test file(s)...");
       Terminal.WriteLine($"Working from: {repoRoot}");
 
+      string coverageDirectory = Path.Combine(repoRoot, "artifacts", "coverage");
+
+      if (command.Coverage)
+      {
+        Directory.CreateDirectory(coverageDirectory);
+        int restoreExitCode = await Shell.Builder("dotnet")
+          .WithArguments("tool", "restore")
+          .WithWorkingDirectory(repoRoot)
+          .WithNoValidation()
+          .RunAsync();
+
+        if (restoreExitCode != 0)
+        {
+          Environment.ExitCode = restoreExitCode;
+          Terminal.WriteErrorLine("❌ dotnet tool restore failed; cannot collect coverage");
+          return Unit.Value;
+        }
+      }
+
       int failedCount = 0;
 
       foreach (string testFile in testFiles)
@@ -63,9 +87,18 @@ internal sealed class TestCommand : ICommand<Unit>
         string relativePath = Path.GetRelativePath(repoRoot, testFile);
         Terminal.WriteLine($"\n▶ {relativePath}");
 
-        ShellBuilder runBuilder = Shell.Builder("dotnet")
-          .WithArguments("run", testFile)
-          .WithNoValidation();
+        ShellBuilder runBuilder = command.Coverage
+          ? Shell.Builder("dotnet")
+            .WithArguments(
+              "dotnet-coverage", "collect",
+              "--output-format", "cobertura",
+              "--output", Path.Combine(coverageDirectory, $"{Path.GetFileNameWithoutExtension(testFile)}.cobertura.xml"),
+              "--", "dotnet", "run", testFile)
+            .WithWorkingDirectory(repoRoot)
+            .WithNoValidation()
+          : Shell.Builder("dotnet")
+            .WithArguments("run", testFile)
+            .WithNoValidation();
 
         if (command.Filter is not null)
         {
