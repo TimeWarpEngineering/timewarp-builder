@@ -5,7 +5,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup Label="TimeWarp Packages">
-    <!-- 3.0.0-beta.1 is net11.0 only. Nuru 4.0.0-beta.11 ships lib/net10.0 and depends on Amuru 2.0.0. -->
+    <!-- 3.0.0-beta.1 is net11.0 only. The git hook runfiles build for net10.0, and Nuru 4.0.0-beta.12 depends on Amuru 2.0.0. -->
     <PackageVersion Include="TimeWarp.Amuru" Version="2.0.0" />
     <PackageVersion Include="TimeWarp.Amuru.Tools" Version="2.0.0" />
     <PackageVersion Include="TimeWarp.Nuru" Version="4.0.0-beta.12" />
