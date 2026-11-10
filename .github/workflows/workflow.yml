@@ -48,6 +48,10 @@ on:
         type: string
         default: ''
 
+defaults:
+  run:
+    shell: pwsh
+
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -101,13 +105,24 @@ jobs:
           # repo's Actions runs and artifacts through gh.
           GH_TOKEN: ${{ github.token }}
         run: |
-          if [ "${{ github.event_name }}" == "release" ]; then
-            dotnet run --file tools/dev-cli/dev.cs -- workflow --mode release --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}"
-          elif [ "${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'release' && inputs.confirm == 'release' }}" == "true" ]; then
-            dotnet run --file tools/dev-cli/dev.cs -- workflow --mode release --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}"
-          else
+          if ('${{ github.event_name }}' -eq 'release') {
+            dotnet run --file tools/dev-cli/dev.cs -- workflow --mode release --api-key '${{ steps.nuget-login.outputs.NUGET_API_KEY }}'
+          }
+          elseif ('${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'release' && inputs.confirm == 'release' }}' -eq 'true') {
+            dotnet run --file tools/dev-cli/dev.cs -- workflow --mode release --api-key '${{ steps.nuget-login.outputs.NUGET_API_KEY }}'
+          }
+          else {
             dotnet run --file tools/dev-cli/dev.cs -- workflow
-          fi
+          }
+
+      # dev test --coverage writes one Cobertura file per Jaribu runfile here.
+      - name: coverage
+        if: success() && (github.event_name != 'workflow_dispatch' || inputs.mode == 'merge') && github.event_name != 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: artifacts/coverage
+          if-no-files-found: warn
 
       - name: Upload Artifacts
         # Green master only: release mode promotes Packages-* from a push run at
@@ -132,27 +147,32 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           EXPECTED_ARTIFACT: Packages-${{ github.run_number }}
         run: |
-          set -euo pipefail
-          tmp="$(mktemp)"
-          trap 'rm -f "$tmp"' EXIT
-          gh api --paginate \
-            -H "Accept: application/vnd.github+json" \
-            "/repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" \
-            --jq '.artifacts[] | select((.name | startswith("Packages-")) and (.expired == false)) | [.created_at, (.id | tostring), .name] | @tsv' \
-            | LC_ALL=C sort -r > "$tmp"
-          if ! cut -f3 "$tmp" | grep -qxF "$EXPECTED_ARTIFACT"; then
-            echo "Just-uploaded artifact ${EXPECTED_ARTIFACT} is not listed yet; skipping prune (keep-last-2 runs on the next green master push)."
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          $listed = gh api --paginate `
+            -H 'Accept: application/vnd.github+json' `
+            "/repos/$env:GITHUB_REPOSITORY/actions/artifacts?per_page=100" `
+            --jq '.artifacts[] | select((.name | startswith("Packages-")) and (.expired == false)) | [.created_at, (.id | tostring), .name] | @tsv'
+          if ($LASTEXITCODE -ne 0) { throw "gh api list failed with exit code $LASTEXITCODE" }
+          # Newest first, ordinal descending (bash: LC_ALL=C sort -r).
+          $lines = [string[]]@($listed | Where-Object { $_ })
+          [Array]::Sort($lines, [StringComparer]::Ordinal)
+          [Array]::Reverse($lines)
+          $rows = @($lines | ForEach-Object { $f = $_ -split "`t"; [pscustomobject]@{ CreatedAt = $f[0]; Id = $f[1]; Name = $f[2] } })
+          if ($rows.Name -cnotcontains $env:EXPECTED_ARTIFACT) {
+            Write-Host "Just-uploaded artifact $env:EXPECTED_ARTIFACT is not listed yet; skipping prune (keep-last-2 runs on the next green master push)."
             exit 0
-          fi
-          keep=2
-          n=0
-          while IFS=$'\t' read -r created_at id name; do
-            [ -n "$id" ] || continue
-            n=$((n + 1))
-            if [ "$n" -le "$keep" ]; then
-              echo "Keeping ${name} (id=${id}, created=${created_at})"
+          }
+          $keep = 2
+          $n = 0
+          foreach ($row in $rows) {
+            if (-not $row.Id) { continue }
+            $n++
+            if ($n -le $keep) {
+              Write-Host "Keeping $($row.Name) (id=$($row.Id), created=$($row.CreatedAt))"
               continue
-            fi
-            echo "Deleting ${name} (id=${id}, created=${created_at})"
-            gh api --method DELETE "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${id}"
-          done < "$tmp"
+            }
+            Write-Host "Deleting $($row.Name) (id=$($row.Id), created=$($row.CreatedAt))"
+            gh api --method DELETE "/repos/$env:GITHUB_REPOSITORY/actions/artifacts/$($row.Id)"
+            if ($LASTEXITCODE -ne 0) { throw "gh api DELETE failed with exit code $LASTEXITCODE" }
+          }
