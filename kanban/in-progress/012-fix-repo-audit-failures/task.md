@@ -11,7 +11,7 @@
 - [x] `workflow-pwsh-shell`: default shell pwsh; convert `Run CI Pipeline` and `Keep last two Packages artifacts` from bash
 - [x] `ci-code-coverage`: `dev test --coverage` (dotnet-coverage, Cobertura) and a `coverage` upload-artifact step
 - [x] `ganda repo audit` passes; build and tests green
-- [ ] CI green on the PR (the converted workflow steps cannot be run locally)
+- [x] CI green on PR #12 (pull_request run 42843650761)
 
 ## Session
 
@@ -28,4 +28,4 @@
 
 - `ganda repo audit`: 43 passed, 0 failed, 3 skipped.
 - `dev build`: 0 errors. `dev test --coverage`: all 6 test files pass, 6 Cobertura files in `artifacts/coverage`.
-- The "Keep last two Packages artifacts" pwsh step was exercised locally against a fake `gh`; the workflow as a whole is unverified until CI runs.
+- The "Keep last two Packages artifacts" pwsh step was exercised locally against a fake `gh`. PR #12 CI is green: the pwsh `Run CI Pipeline` step and the `coverage` upload ran. The artifact-pruning step only runs on a master push, so its first real run is after merge.
