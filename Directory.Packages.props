@@ -11,9 +11,9 @@
     <!-- Source-only dev CLI endpoints: clean, check-version, release, self-install. -->
     <PackageVersion Include="TimeWarp.Nuru.DevCli" Version="4.0.0-beta.12" />
     <PackageVersion Include="TimeWarp.Terminal" Version="2.0.0-beta.1" />
-    <PackageVersion Include="TimeWarp.Build.Tasks" Version="1.0.0" />
+    <PackageVersion Include="TimeWarp.Build.Tasks" Version="1.0.2" />
     <PackageVersion Include="TimeWarp.Jaribu" Version="1.0.0-beta.15" />
-    <PackageVersion Include="TimeWarp.SourceGenerators" Version="1.0.0-beta.12" />
+    <PackageVersion Include="TimeWarp.SourceGenerators" Version="1.0.0-beta.14" />
   </ItemGroup>
   <ItemGroup Label="Testing">
     <PackageVersion Include="Shouldly" Version="4.3.0" />
