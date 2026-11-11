@@ -5,11 +5,11 @@
   <PropertyGroup>
 
     <!-- Suppress warnings that don't apply to CLI tools.
-         DevCli content is compiled from the NuGet cache, where this repo's
-         .editorconfig does not apply, so the IDE* and IL* rules it trips are
-         suppressed here. CA1812 stays on: a dead internal class in this CLI
-         should still fail the build. The DevCli handlers the mediator
-         activates carry their own SuppressMessage. -->
+         DevCli content compiled from the NuGet cache gets its analyzers turned
+         off by the ExemptPackageContentFromAnalyzers target below; the IL*
+         ids here cover the trim/AOT publish. CA1812 stays on: a dead internal
+         class in this CLI should still fail the build. The DevCli handlers the
+         mediator activates carry their own SuppressMessage. -->
     <!-- CA1031: Catch general exception types - OK for CLI error handling -->
     <!-- CA1034: Nested types - used by the Nuru command pattern -->
     <!-- CA1303: Literal strings - OK for CLI output -->
@@ -19,12 +19,10 @@
     <!-- CA2007: ConfigureAwait not needed in top-level console apps -->
     <!-- CA2016: CancellationToken forwarding - will address where needed -->
     <!-- CA2000: Dispose on app builder - handled by framework -->
-    <!-- CA5399: HttpClient certificate revocation - DevCli NuGetVersionService -->
     <!-- RCS1046: Async suffix - private methods don't need it -->
-    <!-- RCS1194: ConfigureAwait - DevCli content compiled outside .editorconfig -->
     <!-- IDE0211: dev.cs is a runfile and must use top-level statements -->
     <!-- CS1591: XML doc comments not required for CLI tool internals -->
-    <NoWarn>$(NoWarn);CA1031;CA1034;CA1303;CA1508;CA1515;CA1849;CA2007;CA2016;CA2000;CA5399;RCS1046;RCS1194;IDE0005;IDE0022;IDE0046;IDE0052;IDE0055;IDE0058;IDE0065;IDE0066;IDE0078;IDE0160;IDE0211;IDE0290;IL2026;IL2104;IL3050;IL3053;CS1591</NoWarn>
+    <NoWarn>$(NoWarn);CA1031;CA1034;CA1303;CA1508;CA1515;CA1849;CA2007;CA2016;CA2000;RCS1046;IDE0211;IL2026;IL2104;IL3050;IL3053;CS1591</NoWarn>
 
     <!-- AOT Support -->
     <PublishAot>true</PublishAot>
@@ -52,5 +50,33 @@
     <PackageReference Include="TimeWarp.Amuru.Tools" />
     <PackageReference Include="TimeWarp.Terminal" />
   </ItemGroup>
+
+  <!-- TimeWarp.Nuru.DevCli ships C# content files compiled from $(NuGetPackageRoot),
+       where the repo .editorconfig cannot reach and two upstream files exceed 500 lines
+       (TWA0038). Exempt only Compile items under $(NuGetPackageRoot) so all analyzers
+       stay active on this repo's own tools/dev-cli sources. -->
+  <Target Name="ExemptPackageContentFromAnalyzers"
+          BeforeTargets="CoreCompile"
+          Condition="'$(NuGetPackageRoot)' != ''">
+    <PropertyGroup>
+      <_TwPackageContentConfig>$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', 'package-content-analyzers.globalconfig'))</_TwPackageContentConfig>
+      <_TwNuGetPackageRoot>$([System.String]::Copy('$(NuGetPackageRoot)').Replace('\','/'))</_TwNuGetPackageRoot>
+    </PropertyGroup>
+    <ItemGroup>
+      <_TwPackageContentCompile Include="@(Compile->'%(FullPath)'->Replace('\','/'))" />
+      <_TwPackageContentCompile Remove="@(_TwPackageContentCompile)"
+                                Condition="!$([System.String]::Copy('%(Identity)').StartsWith('$(_TwNuGetPackageRoot)'))" />
+      <_TwPackageContentLine Include="is_global = true" />
+      <_TwPackageContentLine Include="@(_TwPackageContentCompile->'[%(Identity)]%0Adotnet_analyzer_diagnostic.severity = none')" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(_TwPackageContentConfig)"
+                      Lines="@(_TwPackageContentLine)"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <EditorConfigFiles Include="$(_TwPackageContentConfig)" />
+      <FileWrites Include="$(_TwPackageContentConfig)" />
+    </ItemGroup>
+  </Target>
 
 </Project>
