@@ -32,6 +32,7 @@ Move the central pin for TimeWarp.Build.Tasks from 1.0.2 to 2.0.0 and make the r
 ## Session
 
 - Created: d24e7b7a-5ad1-45c4-bb65-067299a19cc5 (2026-11-12)
+- Implement oracle: implemented by implementer-cursor (cursor, vendor anthropic, model claude-opus-5-5-medium), session not reported, max-turns uncapped (no --max-turns flag; bound 500), Done — 2026-11-12T10:16:44Z
 
 ## Results
 
