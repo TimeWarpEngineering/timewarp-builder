@@ -33,6 +33,8 @@ Move the central pin for TimeWarp.Build.Tasks from 1.0.2 to 2.0.0 and make the r
 
 - Created: d24e7b7a-5ad1-45c4-bb65-067299a19cc5 (2026-11-12)
 - Implement oracle: implemented by implementer-cursor (cursor, vendor anthropic, model claude-opus-5-5-medium), session not reported, max-turns uncapped (no --max-turns flag; bound 500), Done — 2026-11-12T10:16:44Z
+- Review oracle round 1: reviewer-cursor (cursor, model gemini-4-carbon-high), headless, session not reported, effort 1, roster general, max-turns uncapped (no --max-turns flag; bound 80) — 2026-11-12. 0 findings; disposition `clean` (`review/disposition.md`). Result: Done.
+- Review oracle: review by reviewer-cursor (cursor, vendor google, model gemini-4-carbon-high), session not reported, max-turns uncapped (no --max-turns flag; bound 80), artifacts general.md, merged.md, disposition.md — 2026-11-12T10:30:25Z
 
 ## Results
 
@@ -72,6 +74,16 @@ Expect:
 - Build reports 0 Warning(s) and 0 Error(s). Tests pass, pack produces `artifacts/packages/TimeWarp.Builder.2.0.0.nupkg`, and the dev-cli build succeeds. No `TWBT0001` error appears.
 - `strings` on the packed `lib/net11.0/TimeWarp.Builder.dll` shows the `CommitHash` and `CommitDate` metadata.
 - `ganda nuget outdated` prints "All packages are up to date!" and `ganda repo audit` prints "Repository passes all audit checks."
+
+### Review
+
+- Round 1 (effort 1, roster `general`): verified `TimeWarp.Build.Tasks` `1.0.2` -> `2.0.0` package/source diff, non-incremental `Release`/`Debug` library builds, `tools/dev-cli/dev.cs` non-incremental build and Release NativeAOT publish, all 6 Jaribu test runfiles, all 5 `.githooks/*.cs` runfiles, packed `TimeWarp.Builder.2.0.0.nupkg` layout/nuspec/`CommitHash`/`CommitDate` metadata, `ganda nuget outdated`, and `ganda repo audit`; 0 findings raised.
+- **Review disposition: clean.** Rounds: 1, effort: 1, roster: `general`. Final counts: `bug` 0 open / 0 fixed / 0 wontfix; `suggestion` 0 open / 0 fixed / 0 wontfix; `nit` 0 open / 0 fixed / 0 wontfix. No exceptions (`wontfix`) and no escalations. Goal restatement matches the original task; no misread.
+- Artifacts: `review/review-framework.md`, `review/round-1/general.md`, `review/round-1/merged.md`, `review/disposition.md`.
+
+## Review
+
+- Round 1: Done
 
 ## Notes
 
