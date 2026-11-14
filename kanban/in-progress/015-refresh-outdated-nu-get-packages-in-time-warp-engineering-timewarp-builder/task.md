@@ -30,6 +30,8 @@ Acceptance criteria:
 
 - Boy-scout: the first commit's post-commit `ganda repo attest` failed `package-pin-currency`, because TimeWarp.Build.Tasks 2.0.1-beta.1 was published on 2026-11-14. I bumped that pin too, then reran build, test, and audit; all pass.
 - Implement oracle: implemented by implementer-claude (claude, vendor anthropic, model claude-opus-5-5, response model claude-opus-5-5), session 41f7a72f-133e-4753-9f48-410c44d2e2fa, max-turns 500, Done — 2026-11-14T07:59:50Z
+- Review oracle: grok (xAI, Grok 4.7), session 01a1d911-fb4e-7e73-ab9c-59a6c645f61b, effort 1, roster general, turn cap 80, 2026-11-14. Round 1 disposition clean.
+- Review oracle: review by reviewer-grok (grok, vendor xai, model grok-4.7, response model grok-4.7-build), session 01a1d911-fb4e-7e73-ab9c-59a6c645f61b, max-turns 80, artifacts general.md, merged.md, disposition.md — 2026-11-14T08:04:25Z
 
 ## Results
 
@@ -54,3 +56,15 @@ grep '<Version>' source/Directory.Build.props
 ```
 
 Expect: the build succeeds with 0 warnings and produces `artifacts/packages/TimeWarp.Builder.2.1.0-beta.1.nupkg`. All 6 test files pass, and the audit reports "Repository passes all audit checks." The greps show Nuru and Nuru.DevCli at 4.0.0-beta.13, Jaribu at 1.0.0-beta.16, SourceGenerators at 1.0.0-beta.16, CSharp.CodeStyle at 5.12.0, Build.Tasks at 2.0.1-beta.1, and `<Version>2.1.0-beta.1</Version>`.
+
+Review:
+- Round 1, effort 1, roster `general`. Counts: bug 0, suggestion 0, nit 0 (all open/fixed/wontfix zero). Disposition: clean. No wontfix and no escalation.
+- Paths: `review/review-framework.md`, `review/round-1/general.md`, `review/round-1/merged.md`, `review/disposition.md`.
+
+## Learnings
+
+Misread: the goal restatement added "Only those versions change; no other package edits." The task says "Edit Directory.Packages.props in this repo only," which limits the edit to this repository, and it names five outdated pins plus the Version bump. It does not forbid another pin in that file. The Build.Tasks move to 2.0.1-beta.1 answers package-pin-currency and stays. The exclusive allow-list was the misread, not the pin.
+
+## Review
+
+- Round 1: Done
