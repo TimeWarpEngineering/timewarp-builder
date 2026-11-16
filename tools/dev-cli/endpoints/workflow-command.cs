@@ -2,7 +2,12 @@
 // Mode-aware CI/CD pipeline for TimeWarp.Builder.
 #endregion
 #region Design
-// PR/merge: self-install -> clean -> build -> test -> pack. Pack writes the
+// PR/merge: classify -> self-install -> clean -> build -> test -> pack.
+// Classify is PullRequestBuildClassifier (TimeWarp.Nuru.DevCli): on a pull
+// request that changes only declared non-build paths it prints its message
+// and the run exits 0 without building. Every other event builds. Repo
+// additions (readme.md, assets/logo.png) live in .timewarp/dev.jsonc
+// pullRequestBuild, not here. Pack writes the
 // IsPackable set to artifacts/packages; workflow.yml uploads that directory as
 // the Packages-* artifact on a green master push.
 // Self-install uses the runfile because bin/dev is gitignored and missing on a
@@ -94,13 +99,21 @@ internal sealed partial class WorkflowCommand : ICommand<Unit>
 
     private async Task RunPrAsync()
     {
-      Terminal.WriteLine("Pipeline: self-install -> clean -> build -> test -> pack\n");
       Environment.ExitCode = 0;
 
       if (!FindRepoRoot())
       {
         return;
       }
+
+      PullRequestBuildDecision decision = await PullRequestBuildClassifier.DecideAsync(RepoRoot, Ct);
+      Terminal.WriteLine(decision.Message);
+      if (!decision.RequiresBuild)
+      {
+        return;
+      }
+
+      Terminal.WriteLine("Pipeline: self-install -> clean -> build -> test -> pack\n");
 
       if (!await SelfInstallAsync())
       {
