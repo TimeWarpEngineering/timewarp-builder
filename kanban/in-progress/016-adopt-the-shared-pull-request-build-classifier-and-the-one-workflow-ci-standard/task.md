@@ -34,6 +34,10 @@ Survey 2026-11-16 for this repo: no `pull_request` paths filter; `dev workflow` 
 - [x] `ganda repo audit` clean
 - [ ] This task's pull request shows a `CI` run (record the URL in Results)
 
+## Review
+
+- Round 1: Done
+
 ## Notes
 
 
@@ -102,8 +106,14 @@ Local run (no `GITHUB_EVENT_NAME`): expect `No GITHUB_EVENT_NAME (local run). Fu
 | Test | `./bin/dev test` | PASS: all 6 test files passed (exit 0) |
 | Audit | `ganda repo audit` | PASS: 44 passed, 0 failed, 3 skipped. "Repository passes all audit checks." |
 
+### Review disposition
+
+Round 1, effort 2, roster general (one reviewer). Counts: bug 0 open / 0 fixed / 0 wontfix, suggestion 0, nit 0. Disposition: clean. No wontfix and no escalation. The implementer restatement matches the original task; no misread. Paths: `review/review-framework.md`, `review/round-1/merged.md`, `review/disposition.md`.
+
 ## Session
 
 - Created: 64677b22-d705-4b25-b537-4b53732bcb92 (2026-11-16)
 - Implement oracle (claude-opus-5-5) 2026-11-16: classifier wired, pins bumped, buildPaths declared, gates green.
 - Implement oracle: implemented by implementer-claude (claude, vendor anthropic, model claude-opus-5-5, response model claude-opus-5-5), session e21139dc-2e8c-4193-93a0-ba56c0ad56b0, max-turns 500, Done — 2026-11-16T15:15:16Z
+- Review oracle: grok (xAI, grok-4.7), session 01a1e4ed-6464-7903-9cc8-f5e94913188a, effort 2, roster general, turn cap 120, clean — 2026-11-16
+- Review oracle: review by reviewer-grok (grok, vendor xai, model grok-4.7, response model grok-4.7-build), session 01a1e4ed-6464-7903-9cc8-f5e94913188a, max-turns 120, artifacts general.md, merged.md, disposition.md — 2026-11-16T15:20:57Z
