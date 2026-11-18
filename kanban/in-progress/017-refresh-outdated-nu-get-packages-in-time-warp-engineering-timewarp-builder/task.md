@@ -37,6 +37,8 @@ Acceptance criteria:
 - `ganda repo audit` first run: pass with 1 advisory warning (`vscode-window-icon`); `ganda repo audit --fix`
   wrote the gitignored `.vscode/settings.json` (no tracked change); rerun is clean.
 - Implement oracle: implemented by implementer-claude (claude, vendor anthropic, model claude-opus-5-5), session not reported, max-turns 500, Done — 2026-11-18T17:34:20Z
+- Review oracle: grok (xAI, Grok 4.7), session 01a1efb9-6cc7-70c2-a606-d2d10016ec86, effort 1, roster general, turn cap 80, 2026-11-19. Round 1 disposition clean.
+- Review oracle: review by reviewer-grok (grok, vendor xai, model grok-4.7, response model grok-4.7-build), session 01a1efb9-6cc7-70c2-a606-d2d10016ec86, max-turns 80, artifacts general.md, merged.md, disposition.md — 2026-11-18T17:43:27Z
 
 ## Results
 
@@ -72,3 +74,11 @@ dotnet run --file tests/scope-extensions.let.cs
 
 Expect: self-install succeeds with no AMURU0001/AMURU0002 errors; build reports 0 warnings / 0 errors;
 format prints "✅ Code style check passed!"; the test runfile reports all tests passed.
+
+Review:
+- Round 1, effort 1, roster `general`. Counts: bug 0, suggestion 0, nit 0 (all open/fixed/wontfix zero). Disposition: clean. No wontfix and no escalation.
+- Paths: `review/review-framework.md`, `review/round-1/general.md`, `review/round-1/merged.md`, `review/disposition.md`.
+
+## Review
+
+- Round 1: Done
