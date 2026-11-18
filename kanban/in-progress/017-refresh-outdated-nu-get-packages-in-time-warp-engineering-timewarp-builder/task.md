@@ -36,6 +36,7 @@ Acceptance criteria:
   match the old ones. Coverage now runs `dotnet tool run dotnet-coverage …` (was `dotnet dotnet-coverage …`, same local tool).
 - `ganda repo audit` first run: pass with 1 advisory warning (`vscode-window-icon`); `ganda repo audit --fix`
   wrote the gitignored `.vscode/settings.json` (no tracked change); rerun is clean.
+- Implement oracle: implemented by implementer-claude (claude, vendor anthropic, model claude-opus-5-5), session not reported, max-turns 500, Done — 2026-11-18T17:34:20Z
 
 ## Results
 
