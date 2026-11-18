@@ -48,17 +48,16 @@ internal sealed class FormatCommand : ICommand<Unit>
 
       Terminal.WriteLine(command.Fix ? "Fixing code formatting..." : "Checking code formatting...");
 
-      List<string> formatArgs = ["format", solutionPath, "--severity", "warn"];
+      DotNetFormatBuilder formatBuilder = DotNet.Format(solutionPath)
+        .WithSeverity("warn")
+        .WithNoValidation();
 
       if (!command.Fix)
       {
-        formatArgs.Add("--verify-no-changes");
+        formatBuilder = formatBuilder.WithVerifyNoChanges();
       }
 
-      int exitCode = await Shell.Builder("dotnet")
-        .WithArguments([.. formatArgs])
-        .WithNoValidation()
-        .RunAsync();
+      int exitCode = await formatBuilder.RunAsync();
 
       if (exitCode != 0)
       {

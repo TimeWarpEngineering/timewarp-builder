@@ -161,8 +161,9 @@ internal sealed partial class WorkflowCommand : ICommand<Unit>
 
     private async Task<bool> SelfInstallAsync()
     {
-      int exitCode = await Shell.Builder("dotnet")
-        .WithArguments("run", "--file", "tools/dev-cli/dev.cs", "--", "self-install")
+      int exitCode = await DotNet.Run()
+        .WithFile("tools/dev-cli/dev.cs")
+        .WithArguments("self-install")
         .WithWorkingDirectory(RepoRoot)
         .WithNoValidation()
         .RunAsync(Ct);

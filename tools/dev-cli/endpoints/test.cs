@@ -66,10 +66,10 @@ internal sealed class TestCommand : ICommand<Unit>
       if (command.Coverage)
       {
         Directory.CreateDirectory(coverageDirectory);
-        int restoreExitCode = await Shell.Builder("dotnet")
-          .WithArguments("tool", "restore")
+        int restoreExitCode = await DotNet.Tool()
           .WithWorkingDirectory(repoRoot)
           .WithNoValidation()
+          .Restore()
           .RunAsync();
 
         if (restoreExitCode != 0)
@@ -87,25 +87,9 @@ internal sealed class TestCommand : ICommand<Unit>
         string relativePath = Path.GetRelativePath(repoRoot, testFile);
         Terminal.WriteLine($"\n▶ {relativePath}");
 
-        ShellBuilder runBuilder = command.Coverage
-          ? Shell.Builder("dotnet")
-            .WithArguments(
-              "dotnet-coverage", "collect",
-              "--output-format", "cobertura",
-              "--output", Path.Combine(coverageDirectory, $"{Path.GetFileNameWithoutExtension(testFile)}.cobertura.xml"),
-              "--", "dotnet", "run", testFile)
-            .WithWorkingDirectory(repoRoot)
-            .WithNoValidation()
-          : Shell.Builder("dotnet")
-            .WithArguments("run", testFile)
-            .WithNoValidation();
-
-        if (command.Filter is not null)
-        {
-          runBuilder = runBuilder.WithEnvironmentVariable("JARIBU_FILTER_TAG", command.Filter);
-        }
-
-        int exitCode = await runBuilder.RunAsync();
+        int exitCode = command.Coverage
+          ? await RunWithCoverageAsync(repoRoot, coverageDirectory, testFile, command.Filter)
+          : await RunTestFileAsync(testFile, command.Filter);
 
         if (exitCode != 0)
         {
@@ -123,6 +107,41 @@ internal sealed class TestCommand : ICommand<Unit>
 
       Terminal.WriteLine($"\n✅ All {testFiles.Length} test file(s) passed!");
       return Unit.Value;
+    }
+
+    private static Task<int> RunWithCoverageAsync(string repoRoot, string coverageDirectory, string testFile, string? filter)
+    {
+      DotNetToolBuilder toolBuilder = DotNet.Tool()
+        .WithWorkingDirectory(repoRoot)
+        .WithNoValidation();
+
+      if (filter is not null)
+      {
+        toolBuilder = toolBuilder.WithEnvironmentVariable("JARIBU_FILTER_TAG", filter);
+      }
+
+      return toolBuilder
+        .Run("dotnet-coverage")
+        .WithArguments(
+          "collect",
+          "--output-format", "cobertura",
+          "--output", Path.Combine(coverageDirectory, $"{Path.GetFileNameWithoutExtension(testFile)}.cobertura.xml"),
+          "--", "dotnet", "run", testFile)
+        .RunAsync();
+    }
+
+    private static Task<int> RunTestFileAsync(string testFile, string? filter)
+    {
+      DotNetRunBuilder runBuilder = DotNet.Run()
+        .WithFile(testFile)
+        .WithNoValidation();
+
+      if (filter is not null)
+      {
+        runBuilder = runBuilder.WithEnvironmentVariable("JARIBU_FILTER_TAG", filter);
+      }
+
+      return runBuilder.RunAsync();
     }
   }
 }
