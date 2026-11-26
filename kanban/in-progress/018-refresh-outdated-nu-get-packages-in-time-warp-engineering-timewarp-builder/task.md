@@ -27,6 +27,8 @@ Acceptance criteria:
 - Implementer: bumped TimeWarp.Nuru and TimeWarp.Nuru.DevCli 4.0.0-beta.16 -> 4.0.0-beta.17 in `Directory.Packages.props`; reinstalled the dev CLI once (`dotnet run --file tools/dev-cli/dev.cs -- self-install`).
 - Boy-scout audit fixes: `dev-cli-telemetry` (added `.UseTelemetry(options => options.ServiceName = "timewarp-builder-dev")` in `tools/dev-cli/dev.cs`) and `source-file-line-cap` (recorded the 747-line `.agent/workspace/2026-02-06-t00-00-00-ubuntu-custom-tools-discovery-guide.md` in new `.timewarp/line-cap-baseline.json`).
 - Implement oracle: implemented by implementer-claude (claude, vendor anthropic, model claude-opus-5-5, response model claude-opus-5-5), session 02e8af14-8087-4509-be54-6a1599a1fb48, max-turns 500, Done — 2026-11-26T02:42:12Z
+- Review oracle: grok (xAI, Grok 4.7), session 01a215bb-8516-7c52-9cb1-d192c408fb62, effort 1, roster general, turn cap 80, 2026-11-26. Round 1 disposition clean.
+- Review oracle: review by reviewer-grok (grok, vendor xai, model grok-4.7, response model grok-4.7-build), session 01a215bb-8516-7c52-9cb1-d192c408fb62, max-turns 80, artifacts general.md, merged.md, disposition.md — 2026-11-26T02:48:21Z
 
 ## Results
 
@@ -44,3 +46,11 @@ Acceptance criteria:
 
 Smoke: `dotnet run --file tools/dev-cli/dev.cs -- self-install && ./bin/dev build && ./bin/dev --help && ganda repo audit`
 Expect: build succeeds with 0 errors; `dev --help` lists the commands; audit prints "Repository passes"; `grep Nuru Directory.Packages.props` shows 4.0.0-beta.17 for both packages.
+
+Review:
+- Round 1, effort 1, roster `general`. Counts: bug 0, suggestion 0, nit 0 (all open/fixed/wontfix zero). Disposition: clean. No wontfix and no escalation.
+- Paths: `review/review-framework.md`, `review/round-1/general.md`, `review/round-1/merged.md`, `review/disposition.md`.
+
+## Review
+
+- Round 1: Done
